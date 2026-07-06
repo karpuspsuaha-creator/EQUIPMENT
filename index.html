@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
 <meta charset="utf-8" />
-<!-- 1. PENTING: Meta viewport agar pas dengan lebar layar HP -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Form Daily Input Equipment</title>
 <meta name="theme-color" content="#0f172a">
@@ -12,7 +11,7 @@
 <!-- Font elegan untuk nama perusahaan -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ==== CSS ==== */
+/* ==== CSS (dimodifikasi: semua style loader dihapus) ==== */
 :root{
   --bg:#0f172a;
   --card:rgba(17,24,39,0.7);
@@ -26,31 +25,14 @@
   --shadow:0 8px 25px rgba(0,0,0,0.35);
 }
 *{box-sizing:border-box}
-
-/* 2. PERBAIKAN CORE: Mencegah halaman melar melampaui lebar HP */
-html,body{
-  height:100%;
-  width:100%;
-  margin:0;
-  padding:0;
-  overflow-x:hidden; 
-}
+html,body{height:100%}
 body{
+  margin:0;
   background:linear-gradient(160deg,#0b1020,#0f172a 60%,#111827);
-  background-color: #0f172a; 
-  background: url('Generated_Image.png') no-repeat center center fixed;
-  background-size: cover; 
-  background-position: center top;
-  background-attachment: fixed;
   color:var(--text);
   font:16px/1.5 "Inter",system-ui,Segoe UI,Roboto,Arial;
 }
-.container{
-  max-width:1100px;
-  margin:150px auto 24px auto;
-  padding:16px;
-  width:100%;
-}
+.container{max-width:1100px;margin:24px auto;padding:16px}
 .grid{display:grid;gap:16px}
 .card{
   background:var(--card);
@@ -60,7 +42,6 @@ body{
   backdrop-filter:blur(12px) saturate(160%);
   box-shadow:0 8px 25px rgba(0,0,0,0.35);
   transition:transform .2s ease,box-shadow .3s ease;
-  width:100%;
 }
 .card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.45)}
 h1{font-size:24px;margin:0 0 10px;font-weight:600}
@@ -96,8 +77,7 @@ input:focus,select:focus{
 .btn.warn:hover{background:#d97706}
 .btn.danger{background:var(--danger)}
 .btn.danger:hover{background:#dc2626}
-
-.table{width:100%;border-collapse:separate;border-spacing:0;}
+.table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto}
 .table th,.table td{
   padding:10px 8px;border-bottom:1px solid var(--border);
   text-align:left;font-size:14px
@@ -115,30 +95,10 @@ input:focus,select:focus{
   padding:6px 12px;border-radius:999px;font-size:13px
 }
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-
-/* 3. PERBAIKAN RESPONSIVE LAYOUT FORM & TABEL */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-@media (max-width:1024px){
-  .col-3{grid-column:span 4}
-  .col-4{grid-column:span 6}
-  .col-6{grid-column:span 12}
-  .col-8{grid-column:span 12}
-}
-
-@media (max-width:768px){
-  .row{grid-template-columns:1fr; gap:10px;}
+@media (max-width:800px){
+  .row{grid-template-columns:1fr}
   .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1}
-  .actions { width: 100%; }
-  .btn { width: 100%; text-align: center; }
-  .filters { flex-direction: column; width: 100%; }
-  .filters select, .filters input, .filters button { width: 100%; }
 }
-
 .action-bar {
   margin-top: 32px;
   display: flex;
@@ -147,7 +107,20 @@ input:focus,select:focus{
   padding-top: 20px;
   border-top: 1px dashed var(--border);
 }
+body {
+  height: 100%;
+  background-color: #0f172a; /* warna gelap cadangan */
+  background: url('Generated_Image.png') no-repeat center center fixed;
+  background-size: 110%; /* biar gak terlalu zoom */
+  background-position: center top;
+  background-attachment: fixed;
+  color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
+/* Pastikan elemen pembungkus utama ikut gelap */
 main, .container, .content, #app {
   background: transparent;
 }
@@ -166,10 +139,11 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.45); 
+  background: rgba(0, 0, 0, 0.45); /* lapisan gelap transparan */
   z-index: -1;
 }
 
+/* Overlay biar gradasi bawah gelap */
 body::after {
   content: "";
   position: fixed;
@@ -182,6 +156,8 @@ body::after {
   z-index: -1;
 }
 
+
+/* Elemen info biar tetap elegan di atas background */
 #lokasiInfo {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -208,46 +184,46 @@ body::after {
   transform-origin: left center;
 }
 
+/* --- Cegah auto zoom di input saat diklik di HP --- */
 @media (max-width: 768px) {
-  input, select, textarea {
-    font-size: 16px !important; 
-  }
-  #lokasiInfo {
-    position: static;
-    margin: 10px auto;
-    text-align: center;
-    width: fit-content;
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* batas aman biar HP gak zoom */
   }
 }
 
+/* Biar hasil output unit gak seperti balon di HP */
 .chip {
   display: inline-block;
-  font-size: 14px;           
-  padding: 6px 10px;         
+  font-size: 14px;           /* kecilin tulisan */
+  padding: 6px 10px;         /* kurangi ruang dalam */
   border-radius: 4px;
-  background: #0f172a;       
+  background: #0f172a;       /* sama kayak tema gelap */
   color: #fff;
   text-align: center;
   width: 100%;
   box-sizing: border-box;
-  word-break: break-word;    
+  word-break: break-word;    /* biar gak keluar layar */
   white-space: normal;
 }
 
+/* biar gak membesar pas diklik di HP */
 .chip:focus {
   outline: none;
   transform: scale(1);
 }
 
+/* ==== LOGO & NAMA PERUSAHAAN ==== */
+/* ==== FONT OVIDIUS SCRIPT ==== */
 @font-face {
   font-family: 'Ovidius Script';
   src: url('OvidiusScript.ttf') format('truetype');
   font-display: swap;
 }
 
-/* 4. PERBAIKAN HEADER: Memastikan lebar 100% penuh dan aman */
 #headerLogo {
-  position: fixed; /* Berubah menjadi fixed agar konsisten menempel penuh di atas */
+  position: sticky;
   top: 0;
   left: 0;
   width: 100%;
@@ -256,42 +232,53 @@ body::after {
   justify-content: center;
   gap: 16px;
   z-index: 999;
-  background: rgba(15,23,42,0.95);
+  background: rgba(15,23,42,0.85);
   padding: 14px 24px;
   border-bottom: 2px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(10px);
   box-shadow: 0 3px 8px rgba(0,0,0,0.35);
-  box-sizing: border-box;
 }
 
+/* Logo agak lebih besar dan kontras */
 #logoPerusahaan {
   height: 90px;
   width: auto;
   border-radius: 10px;
   background: #fff;
   padding: 6px;
-  box-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 18px rgba(0,0,0,0.35);
+  box-shadow: 0 0 12px rgba(255,255,255,0.2),
+              0 0 18px rgba(0,0,0,0.35);
   transition: all 0.3s ease;
 }
 
+/* Nama perusahaan tampil elegan & mewah */
 #namaPerusahaan {
   font-family: 'Ovidius Script', cursive;
   font-size: 36px;
   font-weight: 500;
   letter-spacing: 1.2px;
   color: #f8f8f8;
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px rgba(200, 200, 255, 0.25);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.4),
+               0 0 10px rgba(200, 200, 255, 0.25);
   transition: all 0.3s ease;
 }
 
+/* Tambahkan ruang agar konten gak ketiban */
+.container {
+  max-width: 1100px;
+  margin: 150px auto 24px auto;
+  padding: 16px;
+}
+
+/* ==== Responsif ==== */
 @media (max-width: 768px) {
   #headerLogo {
     padding: 10px 16px;
     gap: 10px;
   }
-  #logoPerusahaan { height: 60px; }
-  #namaPerusahaan { font-size: 24px; }
-  .container { margin-top: 100px; }
+  #logoPerusahaan { height: 70px; }
+  #namaPerusahaan { font-size: 26px; }
+  .container { margin-top: 110px; }
 }
 
 @media (max-width: 480px) {
@@ -299,11 +286,12 @@ body::after {
     padding: 8px 10px;
     gap: 8px;
   }
-  #logoPerusahaan { height: 45px; }
-  #namaPerusahaan { font-size: 18px; }
-  .container { margin-top: 85px; }
+  #logoPerusahaan { height: 55px; }
+  #namaPerusahaan { font-size: 20px; }
+  .container { margin-top: 95px; }
 }
 
+/* ==== MODAL POPUP ==== */
 #popupModal {
   position: fixed;
   top: 50%;
@@ -340,6 +328,7 @@ body::after {
 }
 #popupModal .closeBtn:hover { background: #111827; }
 
+/* ==== POPUP KONFIRMASI MODERN ==== */
 #popupConfirm {
   position: fixed;
   inset: 0;
@@ -371,6 +360,7 @@ body::after {
   gap: 10px;
 }
 
+/* KMZ Boundary Tooltip */
 .kmz-tooltip {
   background: rgba(239, 68, 68, 0.9);
   color: #fff;
@@ -393,6 +383,7 @@ body::after {
 </head>
 <body>
 
+<!-- 🏢 Logo & Nama Perusahaan -->
 <div id="headerLogo">
   <img src="logo-harita-group.jpg" alt="Logo Harita Group" id="logoPerusahaan">
   <span id="namaPerusahaan"><span style="letter-spacing:3px;">&nbsp;</span> MCR AJA</span>
@@ -400,6 +391,7 @@ body::after {
 
 <div id="lokasiInfo">GPS: mencari...</div>
 <div class="container grid">
+<!-- FORM INPUT -->
 <div class="card">
 <h1>Form Daily Input Equipment</h1>
 <h2>Waktu & lokasi tercatat otomatis</h2>
@@ -421,6 +413,7 @@ body::after {
 </div>
 </div>
 
+<!-- === TAMBAHAN TIM EQUIPMENT: pilih sekali, tersimpan === -->
 <div class="row" style="margin-top:8px">
   <div class="col-4">
     <label>ID Equipment</label>
@@ -440,8 +433,15 @@ body::after {
     <div class="chip" id="equipmentNow">Belum dipilih</div>
   </div>
 </div>
+<!-- === /TAMBAHAN TIM EQUIPMENT === -->
+
+<div style="display:flex; gap:8px; margin-top:10px;">
+  <!-- area loader-related dihapus -->
+</div>
 
 <div class="row" style="margin-top:8px">
+  <!-- Loader inputs removed entirely -->
+
   <div class="col-4">
     <label>Unit</label>
     <div style="display:flex;gap:6px">
@@ -486,6 +486,7 @@ body::after {
       <label>Keterangan</label>
       <input id="keterangan" placeholder="Isi keterangan tambahan...">
     </div>
+<!-- Jumlah Bucket removed from form -->
     <div class="col-12">
       <label>Boundary Area (KMZ)</label>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -501,8 +502,7 @@ body::after {
 
     <div class="col-12" style="margin-top:16px;">
       <label>Pilih Titik Lokasi (klik peta)</label>
-      <!-- Memastikan peta responsive lebar 100% dan set tinggi aman untuk layar HP -->
-      <div id="map" style="height:350px; max-height:70vh; border-radius:12px; margin-top:6px; width:100%;"></div>
+      <div id="map" style="height:500px;border-radius:12px;margin-top:6px;"></div>
       <div class="chip" id="areaName" style="margin-top:6px;">User Location: -</div>
       <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
     </div>
@@ -529,6 +529,7 @@ body::after {
      </div>
    </div>
 
+<!-- DATA TERSIMPAN -->
 <div class="card" style="margin-top:24px;">
 <div class="row" style="align-items:end">
 <div class="col-8">
@@ -547,7 +548,7 @@ body::after {
 <div class="chip" id="totalInfo">0 data</div>
 </div>
 </div>
-<div class="table-responsive" style="margin-top:8px">
+<div style="overflow:auto;margin-top:8px">
 <table class="table" id="tbl">
 <thead>
 <tr>
@@ -582,12 +583,14 @@ body::after {
 </div>
 </div>
 
+<!-- POPUP MODAL -->
 <div id="popupModal">
   <div class="icon" id="popupIcon">✅</div>
   <div class="msg" id="popupMsg">Data tersimpan!</div>
   <button class="closeBtn" onclick="closePopup()">Tutup</button>
 </div>
 
+<!-- POPUP KONFIRMASI MODERN -->
 <div id="popupConfirm">
   <div class="content">
     <div class="msg" id="confirmMsg">Apakah yakin ingin menghapus data ini?</div>
@@ -600,16 +603,21 @@ body::after {
 
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.7/dist/dexie.min.js"></script>
 <script>
+// ==== SEMUA JS DI GABUNG DAN DIBENAHI URUTANNYA ====
+
+// ==== UTILITAS WAKTU ====
 const pad = n => String(n).padStart(2,'0');
 function getTanggal(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
 function getJam(d=new Date()){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;}
 
+// ==== STATE ====
 let SHIFT_AKTIF=1;
 let lokasiTerakhir={lat:null,lon:null};
 let photoData = null;
 let photoName = null;
 let photoObjectUrls = [];
 
+// ==== INDEXEDDB (Dexie) ====
 const db = new Dexie('EquipmentDB');
 db.version(1).stores({
   produksi_data_v2: '++id, tanggal, shift, equipment, hauler, photo',
@@ -663,6 +671,7 @@ async function migrateFromLocalStorage(){
   } catch(e) { console.error('Migrasi equipment gagal:', e); }
 }
 
+// ==== STORAGE ====
 async function load(){
   return await db.produksi_data_v2.toArray();
 }
@@ -673,6 +682,7 @@ async function save(arr){
 async function deleteRecord(id){return await db.produksi_data_v2.delete(id);}
 async function clearAllData(){await db.produksi_data_v2.clear();}
 
+// ==== SETTINGS (Equipment) ====
 async function getEquipmentId(){
   const s = await db.settings.get('EQUIPMENT_ID');
   return s ? s.value : '';
@@ -682,6 +692,7 @@ async function setEquipmentSetting(val){
   await db.settings.put({key:'EQUIPMENT_ID', value:val});
 }
 
+// ==== PHOTO ====
 async function loadPhotoNames(){
   const names = [];
   await db.photos_v1.each(photo => names.push(photo.name));
@@ -746,6 +757,7 @@ function clearPhoto() {
   }
 }
 
+// ==== SHIFT ====
 function setShift(n){
   SHIFT_AKTIF=(n===2)?2:1;
   document.getElementById('btnShift1').style.outline=SHIFT_AKTIF===1?'2px solid var(--accent)':'none';
@@ -753,6 +765,7 @@ function setShift(n){
   focusFirst();
 }
 
+// ==== CLOCK REALTIME ====
 function tick(){
   const now=new Date();
   document.getElementById('tanggalNow').value=getTanggal(now);
@@ -760,6 +773,7 @@ function tick(){
 }
 setInterval(tick,1000);tick();
 
+// ==== FORM ====
 function focusFirst(){ 
   const el = document.getElementById('haulerPrefix');
   if(el) el.focus();
@@ -781,6 +795,7 @@ async function getForm() {
   }
 
   const haulerFull = findFullCode(haulerPrefix, haulerNo);
+
   const jamSekarang = getJam(now);
   const category = document.getElementById('category').value.trim();
 
@@ -820,7 +835,6 @@ function valid(d){
   if(!d.hauler)return'Hauler wajib diisi';
   return'';
 }
-
 function resetForm(){
   document.getElementById('haulerPrefix').value = '';
   document.getElementById('haulerNo').value = '';
@@ -828,6 +842,7 @@ function resetForm(){
   clearPhoto();
 }
 
+// === Load JSON master unit ===
 let MASTER_UNITS = {};
 fetch('Master_Unit.json')
   .then(res => res.json())
@@ -836,6 +851,7 @@ fetch('Master_Unit.json')
   })
   .catch(err => console.error("Gagal load Master_Unit.json:", err));
 
+// === Update Hauler Output with Suggestion ===
 function updateHaulerOutput() {
   const prefixEl = document.getElementById('haulerPrefix');
   const codeEl = document.getElementById('haulerNo');
@@ -886,6 +902,7 @@ function updateHaulerOutput() {
   });
 }
 
+// ==== POPUP UTAMA ====
 function showPopup(msg,type='success'){
   const modal=document.getElementById('popupModal');
   const icon=document.getElementById('popupIcon');
@@ -895,7 +912,6 @@ function showPopup(msg,type='success'){
   else{icon.textContent='❌';icon.className='icon error';}
   modal.style.display='block';
 }
-
 function closePopup(){
   const modal=document.getElementById('popupModal');
   const icon=document.getElementById('popupIcon');
@@ -905,6 +921,7 @@ function closePopup(){
   modal.style.display='none';
 }
 
+// ==== PHOTO PREVIEW FULL ====
 function showPhotoFull(src){
   const modal=document.getElementById('popupModal');
   const icon=document.getElementById('popupIcon');
@@ -915,21 +932,21 @@ function showPhotoFull(src){
   modal.style.display='block';
 }
 
+// ==== POPUP KONFIRM ====
 let confirmCallback=null;
 function showConfirm(msg,cb){
   confirmCallback=cb;
   document.getElementById('confirmMsg').textContent=msg;
   document.getElementById('popupConfirm').classList.add('active');
 }
-
 function closeConfirm(){
   document.getElementById('popupConfirm').classList.remove('active');
   setTimeout(()=>{confirmCallback=null;},200);
 }
-
 document.getElementById('confirmYes').onclick=()=>{if(confirmCallback)confirmCallback(true);closeConfirm();}
 document.getElementById('confirmNo').onclick=()=>{if(confirmCallback)confirmCallback(false);closeConfirm();}
 
+// ==== PENENTUAN SHIFT & TANGGAL KERJA OTOMATIS ====
 function getShiftAndTanggalKerja() {
   const now = new Date();
   const jam = now.getHours();
@@ -937,10 +954,13 @@ function getShiftAndTanggalKerja() {
 
   let shift;
   if (jam >= 6 && jam < 18) {
+    // Shift 1: 06.00–17.59, tanggal sama
     shift = 1;
   } else {
+    // Shift 2: 18.00–05.59
     shift = 2;
     if (jam >= 0 && jam < 6) {
+      // Jam 00:00–05:59 → tanggal kerja harus mundur 1 hari
       tanggalKerja.setDate(tanggalKerja.getDate() - 1);
     }
   }
@@ -955,6 +975,7 @@ function getShiftAndTanggalKerja() {
   };
 }
 
+// ==== SIMPAN DATA ====
 async function simpan(){
   const d=await getForm();const err=valid(d);
   if(err){showPopup(err,'error');return;}
@@ -971,13 +992,13 @@ async function simpan(){
   await render();
   showPopup('Data tersimpan!','success');
 }
-
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='SELECT')){
     e.preventDefault();simpan();
   }
 });
 
+// ==== TABEL ====
 function escapeHtml(s){
   return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
 }
@@ -1029,74 +1050,79 @@ async function render(){
   await Promise.all(photoPromises);
 
   batch.forEach((r,i) => {
+    function fixUnit(prefix, codeOrFull){
+      if(!prefix || !MASTER_UNITS[prefix]) return codeOrFull;
+      const short = codeOrFull.split('-').pop();
+      const found = MASTER_UNITS[prefix].find(x => x.endsWith(`-${short.padStart(3,'0')}`));
+      return found || codeOrFull;
+    }
+
+    if(r.hauler && r.hauler.includes('-')){
+      const prefix = r.hauler.split('-')[0];
+      r.hauler = fixUnit(prefix, r.hauler);
+    }
+
     const tr = document.createElement('tr');
+
+    const badge = `<span class="badge ${r.shift==1?'s1':'s2'}">${r.shift==1?'Shift 1':'Shift 2'}</span>`;
+    const photoSrc = r.photo ? (photoUrls[r.photo] || null) : null;
+
     tr.innerHTML = `
-      <td>${start + i + 1}</td>
-      <td>${escapeHtml(r.tanggal)}</td>
-      <td>${escapeHtml(r.jam)}</td>
-      <td>Shift ${escapeHtml(r.shift)}</td>
-      <td>${escapeHtml(r.equipment)}</td>
-      <td>${escapeHtml(r.hauler)}</td>
-      <td>${escapeHtml(r.category)}</td>
-      <td>${escapeHtml(r.unitRunning || '-')}</td>
-      <td>${escapeHtml(r.unitNoRunning || '-')}</td>
-      <td>${escapeHtml(r.keterangan || '-')}</td>
-      <td>${escapeHtml(r.locationArea || '-')}</td>
-      <td>${r.lat ? r.lat.toFixed(6) : '-'}</td>
-      <td>${r.lon ? r.lon.toFixed(6) : '-'}</td>
-      <td>${escapeHtml(r.unitLocationArea || '-')}</td>
-      <td>${r.unitLat ? r.unitLat.toFixed(6) : '-'}</td>
-      <td>${r.unitLon ? r.unitLon.toFixed(6) : '-'}</td>
-      <td>${r.photo ? `<button class="btn secondary" onclick="showPhotoFull('${photoUrls[r.photo]}')">Lihat</button>` : '-'}</td>
-      <td><button class="btn danger" onclick="hapusSatu(${r.id})">Hapus</button></td>
-    `;
+       <td>${start+i+1}</td>
+       <td>${r.tanggal}</td>
+       <td>${badge}</td>
+       <td>${escapeHtml(r.equipment||'')}</td>
+       <td>${escapeHtml(r.hauler)}</td>
+       <td>${escapeHtml(r.category)}</td>
+       <td>${r.unitRunning || '-'}</td>
+       <td>${r.unitNoRunning || '-'}</td>
+       <td>${escapeHtml(r.keterangan)}</td>
+       <td>${escapeHtml(r.locationArea || '-')}</td>
+       <td>${r.lat ? r.lat.toFixed(5) : '-'}</td>
+       <td>${r.lon ? r.lon.toFixed(5) : '-'}</td>
+       <td>${escapeHtml(r.unitLocationArea || '-')}</td>
+       <td>${r.unitLat ? r.unitLat.toFixed(5) : '-'}</td>
+       <td>${r.unitLon ? r.unitLon.toFixed(5) : '-'}</td>
+       <td>${photoSrc ? `<img src="${photoSrc}" style="max-width:60px;max-height:60px;border-radius:4px;cursor:pointer" onclick="showPhotoFull('${photoSrc.replace(/"/g, '&quot;')}')">` : (r.photo ? escapeHtml(r.photo) : '-')}</td>
+       <td><button class="btn danger" onclick="hapusModern(${r.id},this)">Hapus</button></td>
+     `;
+
     tbody.appendChild(tr);
   });
+
+  const totalPage = Math.ceil(data.length / perPage) || 1;
+  const pageInfo = document.getElementById('pageInfo');
+  if(pageInfo) pageInfo.textContent = `Page ${page + 1} / ${totalPage}`;
 }
 
-async function hapusSatu(id) {
-  showConfirm('Hapus data ini?', async yes => {
-    if(yes) {
-      const item = await db.produksi_data_v2.get(id);
-      if(item && item.photo) {
-        await db.photos_v1.delete(item.photo);
-      }
-      await deleteRecord(id);
-      render();
-    }
-  });
-}
-
-async function hapusSemua() {
-  showConfirm('Hapus semua data & foto?', async yes => {
-    if(yes) {
-      await clearAllData();
-      await db.photos_v1.clear();
-      render();
-    }
-  });
-}
-
-function clearFilter() {
+async function clearFilter(){
   document.getElementById('filterShift').value = '';
   document.getElementById('filterDate').value = '';
-  render();
+  await render();
 }
 
-async function setEquipmentId(val) {
-  await setEquipmentSetting(val);
-  document.getElementById('equipmentNow').textContent = val || 'Belum dipilih';
+// ==== HAPUS ====
+async function hapusModern(id,btn){
+  showConfirm('Apakah yakin ingin menghapus baris ini?',async ok=>{
+    if(ok){
+      await db.produksi_data_v2.delete(id);
+      if(btn){
+        const tr=btn.closest('tr');
+        tr.style.opacity='0';tr.style.transform='translateX(-30px)';
+        setTimeout(async ()=>{await render();showPopup('Data berhasil dihapus!','success');},300);
+      }else{await render();showPopup('Data berhasil dihapus!','success');}
+    }
+  });
 }
-
-window.onload = async () => {
-  await migrateFromLocalStorage();
-  const eq = await getEquipmentId();
-  if(eq) {
-    document.getElementById('equipmentId').value = eq;
-    document.getElementById('equipmentNow').textContent = eq;
-  }
-  render();
-};
+async function hapusSemua(){
+  showConfirm('Apakah yakin ingin menghapus semua data?',async ok=>{
+    if(ok){
+      await db.produksi_data_v2.clear();
+      await render();
+      showPopup('Semua data berhasil dihapus!','success');
+    }
+  });
+}
 
 // ==== RESIZE FOTO ====
 function convertToWebP(file, quality = 1.0) {
