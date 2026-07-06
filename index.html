@@ -579,7 +579,7 @@ body::after {
   <button class="btn secondary" onclick="hapusSemua()">Hapus Semua</button>
   <button class="btn warn" onclick="exportCSVFiltered()" style="margin-left:auto;">Export to ZIP</button>
 </div>
-<div class="footer">Data disimpan di browser (localStorage). Bisa dipakai offline.</div>
+<div class="footer">Data disimpan di browser (IndexedDB). Bisa dipakai offline.</div>
 </div>
 </div>
 
@@ -601,6 +601,7 @@ body::after {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.7/dist/dexie.min.js"></script>
 <script>
 // ==== SEMUA JS DI GABUNG DAN DIBENAHI URUTANNYA ====
 
@@ -611,41 +612,119 @@ function getJam(d=new Date()){return `${pad(d.getHours())}:${pad(d.getMinutes())
 
 // ==== STATE ====
 let SHIFT_AKTIF=1;
-const KEY='produksi_data_v2';
-const KEY_PHOTOS='photos_v1';
 let lokasiTerakhir={lat:null,lon:null};
-const KEY_EQUIPMENT='EQUIPMENT_ID';
 let photoData = null;
 let photoName = null;
+let photoObjectUrls = [];
 
-// ==== PHOTO STORAGE ====
-function loadPhotos(){try{return JSON.parse(localStorage.getItem(KEY_PHOTOS))||{};}catch{return{};} }
-function savePhotos(obj){localStorage.setItem(KEY_PHOTOS,JSON.stringify(obj));}
+// ==== INDEXEDDB (Dexie) ====
+const db = new Dexie('EquipmentDB');
+db.version(1).stores({
+  produksi_data_v2: '++id, tanggal, shift, equipment, hauler, photo',
+  photos_v1: 'name',
+  settings: 'key'
+});
+
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const b64 = atob(parts[1]);
+  const arr = new Uint8Array(b64.length);
+  for (let i = 0; i < b64.length; i++) {
+    arr[i] = b64.charCodeAt(i);
+  }
+  return new Blob([arr], { type: mime });
+}
+
+async function migrateFromLocalStorage(){
+  try {
+    const oldRecords = JSON.parse(localStorage.getItem('produksi_data_v2') || '[]');
+    if (oldRecords.length) {
+      await db.produksi_data_v2.clear();
+      for (const r of oldRecords) {
+        await db.produksi_data_v2.add(r);
+      }
+      localStorage.removeItem('produksi_data_v2');
+    }
+  } catch(e) { console.error('Migrasi data gagal:', e); }
+
+  try {
+    const oldPhotos = JSON.parse(localStorage.getItem('photos_v1') || '{}');
+    const photoNames = Object.keys(oldPhotos);
+    if (photoNames.length) {
+      for (const name of photoNames) {
+        try {
+          const blob = dataUrlToBlob(oldPhotos[name]);
+          await db.photos_v1.put({name: name, blob: blob});
+        } catch(e) { console.error('Migrasi foto gagal:', name, e); }
+      }
+      localStorage.removeItem('photos_v1');
+    }
+  } catch(e) { console.error('Migrasi foto gagal:', e); }
+
+  try {
+    const oldEquip = localStorage.getItem('EQUIPMENT_ID');
+    if (oldEquip) {
+      await db.settings.put({key:'EQUIPMENT_ID', value:oldEquip});
+      localStorage.removeItem('EQUIPMENT_ID');
+    }
+  } catch(e) { console.error('Migrasi equipment gagal:', e); }
+}
+
+// ==== STORAGE ====
+async function load(){
+  return await db.produksi_data_v2.toArray();
+}
+async function save(arr){
+  await db.produksi_data_v2.clear();
+  for (const r of arr) await db.produksi_data_v2.add(r);
+}
+async function deleteRecord(id){return await db.produksi_data_v2.delete(id);}
+async function clearAllData(){await db.produksi_data_v2.clear();}
+
+// ==== SETTINGS (Equipment) ====
+async function getEquipmentId(){
+  const s = await db.settings.get('EQUIPMENT_ID');
+  return s ? s.value : '';
+}
+async function setEquipmentSetting(val){
+  if(!val)return;
+  await db.settings.put({key:'EQUIPMENT_ID', value:val});
+}
 
 // ==== PHOTO ====
-function handlePhoto(file) {
+async function loadPhotoNames(){
+  const names = [];
+  await db.photos_v1.each(photo => names.push(photo.name));
+  return names;
+}
+
+async function loadPhotoBlob(name){
+  const photo = await db.photos_v1.get(name);
+  return photo ? photo.blob : null;
+}
+
+async function handlePhoto(file) {
   if (!file || !file.type.startsWith('image/')) {
     showPopup('File bukan gambar', 'error');
     return;
   }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    photoData = e.target.result;
-    photoName = generatePhotoName();
-    document.getElementById('photoImg').src = photoData;
-    document.getElementById('photoPreview').style.display = 'block';
-    document.getElementById('photoStatus').textContent = 'Foto: ' + photoName;
-    document.getElementById('photoStatus').style.display = 'inline-block';
-    document.getElementById('btnClearPhoto').style.display = 'inline-block';
-  };
-  reader.readAsDataURL(file);
+  photoData = file;
+  photoName = await generatePhotoName();
+  const url = URL.createObjectURL(file);
+  if (window.previewObjectUrl) URL.revokeObjectURL(window.previewObjectUrl);
+  window.previewObjectUrl = url;
+  document.getElementById('photoImg').src = url;
+  document.getElementById('photoPreview').style.display = 'block';
+  document.getElementById('photoStatus').textContent = 'Foto: ' + photoName;
+  document.getElementById('photoStatus').style.display = 'inline-block';
+  document.getElementById('btnClearPhoto').style.display = 'inline-block';
 }
 
-function generatePhotoName() {
+async function generatePhotoName() {
   const haulerNo = document.getElementById('haulerNo').value.trim() || 'unit';
   const haulerPrefix = document.getElementById('haulerPrefix').value.trim() || '';
   
-  // Cari kode lengkap dari master unit jika ada
   let haulerFull = haulerPrefix ? `${haulerPrefix}-${haulerNo.padStart(3,'0')}` : haulerNo;
   if (haulerPrefix && MASTER_UNITS[haulerPrefix]) {
     const found = MASTER_UNITS[haulerPrefix].find(item => item.endsWith(`-${haulerNo.padStart(3,'0')}`));
@@ -655,10 +734,10 @@ function generatePhotoName() {
   const shiftInfo = getShiftAndTanggalKerja();
   let baseName = `${haulerFull}_${shiftInfo.tanggal}_S${shiftInfo.shift}`;
   
-  const photos = loadPhotos();
+  const names = await loadPhotoNames();
   let name = baseName + '.jpg';
   let counter = 1;
-  while (photos[name]) {
+  while (names.includes(name)) {
     counter++;
     name = `${baseName}(${counter}).jpg`;
   }
@@ -672,6 +751,10 @@ function clearPhoto() {
   document.getElementById('photoPreview').style.display = 'none';
   document.getElementById('photoStatus').style.display = 'none';
   document.getElementById('btnClearPhoto').style.display = 'none';
+  if (window.previewObjectUrl) {
+    URL.revokeObjectURL(window.previewObjectUrl);
+    window.previewObjectUrl = null;
+  }
 }
 
 // ==== SHIFT ====
@@ -690,17 +773,13 @@ function tick(){
 }
 setInterval(tick,1000);tick();
 
-// ==== STORAGE ====
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch{return[];} }
-function save(arr){localStorage.setItem(KEY,JSON.stringify(arr));}
-
 // ==== FORM ====
 function focusFirst(){ 
   const el = document.getElementById('haulerPrefix');
   if(el) el.focus();
 }
 
-function getForm() {
+async function getForm() {
   const now = new Date();
   const shiftInfo = getShiftAndTanggalKerja();
 
@@ -731,11 +810,12 @@ function getForm() {
     unitNoRunning = jamSekarang;
   }
 
+  const equipment = await getEquipmentId();
   return {
     tanggal: shiftInfo.tanggal,
     jam: getJam(now),
     shift: shiftInfo.shift,
-    equipment: localStorage.getItem(KEY_EQUIPMENT) || '',
+    equipment: equipment || '',
     hauler: haulerFull,
     category: document.getElementById('category').value.trim(),
     unitRunning: unitRunning,
@@ -747,7 +827,7 @@ function getForm() {
     unitLat: window.unitLat,
     unitLon: window.unitLon,
     unitLocationArea: window.getAreaName && window.unitLat != null && window.unitLon != null ? window.getAreaName(window.unitLat, window.unitLon) : '-',
-    photo: photoData
+    photo: photoName || null
   };
 }
 
@@ -896,22 +976,20 @@ function getShiftAndTanggalKerja() {
 }
 
 // ==== SIMPAN DATA ====
-function simpan(){
-  const d=getForm();const err=valid(d);
+async function simpan(){
+  const d=await getForm();const err=valid(d);
   if(err){showPopup(err,'error');return;}
   
-  // Simpan foto ke storage terpisah
   if (photoData && photoName) {
-    const photos = loadPhotos();
-    photos[photoName] = photoData;
-    savePhotos(photos);
-    d.photo = photoName;  // Simpan hanya nama file, bukan data base64
+    await db.photos_v1.put({name: photoName, blob: photoData});
+    d.photo = photoName;
   } else {
     d.photo = null;
   }
   
-  const arr=load();arr.push(d);save(arr);
-  resetForm();render();
+  await db.produksi_data_v2.add(d);
+  resetForm();
+  await render();
   showPopup('Data tersimpan!','success');
 }
 document.addEventListener('keydown',e=>{
@@ -925,11 +1003,16 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
 }
 
-function render(){
+async function render(){
+  if (window.photoObjectUrls) {
+    window.photoObjectUrls.forEach(url => URL.revokeObjectURL(url));
+  }
+  window.photoObjectUrls = [];
+
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
 
-  const arr = load();
+  const arr = await load();
   const fs = document.getElementById('filterShift').value;
   const fd = document.getElementById('filterDate').value;
 
@@ -951,6 +1034,21 @@ function render(){
   const end = start + perPage;
   const batch = data.slice(start,end);
 
+  const photoUrls = {};
+  const photoPromises = batch.map(r => {
+    if (r.photo) {
+      return loadPhotoBlob(r.photo).then(blob => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          window.photoObjectUrls.push(url);
+          photoUrls[r.photo] = url;
+        }
+      });
+    }
+    return Promise.resolve();
+  });
+  await Promise.all(photoPromises);
+
   batch.forEach((r,i) => {
     function fixUnit(prefix, codeOrFull){
       if(!prefix || !MASTER_UNITS[prefix]) return codeOrFull;
@@ -961,19 +1059,17 @@ function render(){
 
     if(r.hauler && r.hauler.includes('-')){
       const prefix = r.hauler.split('-')[0];
-      r.hauler = fixUnit(prefix,r.hauler);
+      r.hauler = fixUnit(prefix, r.hauler);
     }
 
-const tr = document.createElement('tr');
+    const tr = document.createElement('tr');
 
     const badge = `<span class="badge ${r.shift==1?'s1':'s2'}">${r.shift==1?'Shift 1':'Shift 2'}</span>`;
-    const photos = loadPhotos();
-    const photoSrc = r.photo && photos[r.photo] ? photos[r.photo] : null;
+    const photoSrc = r.photo ? (photoUrls[r.photo] || null) : null;
 
     tr.innerHTML = `
        <td>${start+i+1}</td>
        <td>${r.tanggal}</td>
-       <td>${r.jam}</td>
        <td>${badge}</td>
        <td>${escapeHtml(r.equipment||'')}</td>
        <td>${escapeHtml(r.hauler)}</td>
@@ -988,7 +1084,7 @@ const tr = document.createElement('tr');
        <td>${r.unitLat ? r.unitLat.toFixed(5) : '-'}</td>
        <td>${r.unitLon ? r.unitLon.toFixed(5) : '-'}</td>
        <td>${photoSrc ? `<img src="${photoSrc}" style="max-width:60px;max-height:60px;border-radius:4px;cursor:pointer" onclick="showPhotoFull('${photoSrc.replace(/"/g, '&quot;')}')">` : (r.photo ? escapeHtml(r.photo) : '-')}</td>
-       <td><button class="btn danger" onclick="hapusModern(${start+i},this)">Hapus</button></td>
+       <td><button class="btn danger" onclick="hapusModern(${r.id},this)">Hapus</button></td>
      `;
 
     tbody.appendChild(tr);
@@ -999,34 +1095,38 @@ const tr = document.createElement('tr');
   if(pageInfo) pageInfo.textContent = `Page ${page + 1} / ${totalPage}`;
 }
 
-function clearFilter(){
+async function clearFilter(){
   document.getElementById('filterShift').value = '';
   document.getElementById('filterDate').value = '';
-  render();
+  await render();
 }
 
 // ==== HAPUS ====
-function hapusModern(i,btn){
-  showConfirm('Apakah yakin ingin menghapus baris ini?',ok=>{
+async function hapusModern(id,btn){
+  showConfirm('Apakah yakin ingin menghapus baris ini?',async ok=>{
     if(ok){
-      const arr=load();arr.splice(i,1);save(arr);
+      await db.produksi_data_v2.delete(id);
       if(btn){
         const tr=btn.closest('tr');
         tr.style.opacity='0';tr.style.transform='translateX(-30px)';
-        setTimeout(()=>{render();showPopup('Data berhasil dihapus!','success');},300);
-      }else{render();showPopup('Data berhasil dihapus!','success');}
+        setTimeout(async ()=>{await render();showPopup('Data berhasil dihapus!','success');},300);
+      }else{await render();showPopup('Data berhasil dihapus!','success');}
     }
   });
 }
-function hapusSemua(){
-  showConfirm('Apakah yakin ingin menghapus semua data?',ok=>{
-    if(ok){save([]);render();showPopup('Semua data berhasil dihapus!','success');}
+async function hapusSemua(){
+  showConfirm('Apakah yakin ingin menghapus semua data?',async ok=>{
+    if(ok){
+      await db.produksi_data_v2.clear();
+      await render();
+      showPopup('Semua data berhasil dihapus!','success');
+    }
   });
 }
 
 // ==== EXPORT TO EXCEL + PHOTOS ZIP ====
-function exportCSVFiltered(){
-  const arr=load();
+async function exportCSVFiltered(){
+  const arr = await load();
   if(!arr.length){showPopup('Belum ada data.','error');return;}
   const fs=document.getElementById('filterShift').value;
   const fd=document.getElementById('filterDate').value;
@@ -1065,7 +1165,28 @@ const ws=XLSX.utils.json_to_sheet(wsData);
       ) + 4
     }));
 
-    // Tambah hyperlink untuk kolom Foto (path relatif ke folder photos)
+    const now = new Date();
+    const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+    const equip = (await getEquipmentId()).replace(/[^a-zA-Z0-9_-]/g, '');
+    const shiftFilter = document.getElementById('filterShift').value;
+    const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
+
+    const filteredPhotoNames = new Set();
+    data.forEach(r => {
+      if (r.photo) {
+        filteredPhotoNames.add(r.photo);
+      }
+    });
+
+    const existingPhotoNames = new Set();
+    for (const name of filteredPhotoNames) {
+      const photo = await db.photos_v1.get(name);
+      if (photo && photo.blob) {
+        existingPhotoNames.add(name);
+      }
+    }
+
+    // Tambah hyperlink hanya untuk foto yang ada di IndexedDB
     const headers = Object.keys(wsData[0] || {});
     const fotoCol = headers.indexOf("Foto");
     ws['!links'] = [];
@@ -1076,73 +1197,63 @@ const ws=XLSX.utils.json_to_sheet(wsData);
           const cellRef = XLSX.utils.encode_cell({r: R, c: fotoCol});
           const cell = ws[cellRef];
           if (!cell || !cell.v || String(cell.v) === '-') continue;
+          if (!existingPhotoNames.has(cell.v)) continue;
           cell.l = { Target: 'photos/' + cell.v };
           ws['!links'].push({ ref: cellRef, Target: 'photos/' + cell.v });
         }
       }
     }
 
-    const now = new Date();
-    const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
-    const equip = (localStorage.getItem(KEY_EQUIPMENT) || '').replace(/[^a-zA-Z0-9_-]/g, '');
-    const shiftFilter = document.getElementById('filterShift').value;
-    const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
-
-    // Ambil foto yang terfilter
-    const photos = loadPhotos();
-    const filteredPhotos = {};
-    data.forEach(r => {
-      if (r.photo && photos[r.photo]) {
-        filteredPhotos[r.photo] = photos[r.photo];
-      }
-    });
-
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
 
-    if (Object.keys(filteredPhotos).length > 0 && window.JSZip) {
-      // Membuat ZIP berisi Excel dan folder photos
-      downloadCombinedZip(wb, filteredPhotos, dateName, shiftName, equip).then(() => {
+    if (existingPhotoNames.size > 0 && window.JSZip) {
+      downloadCombinedZip(wb, existingPhotoNames, dateName, shiftName, equip).then(() => {
         showPopup('Data berhasil diexport ke ZIP!','success');
       }).catch(err => {
         console.error(err);
         showPopup('Export ZIP gagal: ' + err.message, 'error');
       });
     } else {
-      // Tanpa foto, langsung download Excel
       XLSX.writeFile(wb, `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`);
       showPopup('Data berhasil diexport ke Excel!','success');
     }
 }
 
-function downloadCombinedZip(wb, photos, dateName, shiftName, equip) {
+async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
   return new Promise((resolve, reject) => {
     const zip = new JSZip();
-    
-    // Tambahkan folder photos dengan semua foto
     const photosFolder = zip.folder('photos');
-    Object.keys(photos).forEach(name => {
-      const dataUrl = photos[name];
-      const base64 = dataUrl.split(',')[1];
-      photosFolder.file(name, base64, {base64: true});
-    });
 
-    // Konversi workbook ke binary dan tambahkan ke ZIP
-    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
-    const fileName = `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`;
-    zip.file(fileName, wbout, {base64: true});
+    const promises = Array.from(photoNames).map(name =>
+      db.photos_v1.get(name).then(photo => {
+        if (photo && photo.blob) {
+          return photo.blob.arrayBuffer().then(buffer => {
+            photosFolder.file(name, buffer);
+          });
+        }
+      })
+    );
 
-    zip.generateAsync({type:'blob'}).then(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `Export_${equip || 'ALL'}_${dateName}_${shiftName}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      resolve();
+    Promise.all(promises).then(() => {
+      const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
+      const fileName = `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`;
+      zip.file(fileName, wbout, {base64: true});
+
+      zip.generateAsync({type:'blob'}).then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Export_${equip || 'ALL'}_${dateName}_${shiftName}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        resolve();
+      }).catch(err => {
+        reject(err);
+      });
     }).catch(err => {
       reject(err);
     });
@@ -1150,21 +1261,19 @@ function downloadCombinedZip(wb, photos, dateName, shiftName, equip) {
 }
 
 // ==== EQUIPMENT ====
-function setEquipmentId(id){
+async function setEquipmentId(id){
   if(!id)return;
-  localStorage.setItem(KEY_EQUIPMENT,id);
+  await setEquipmentSetting(id);
   document.getElementById('equipmentNow').textContent="Aktif: "+id;
 }
 
-function autoShiftUpdate() {
+async function autoShiftUpdate() {
   const info = getShiftAndTanggalKerja();
   SHIFT_AKTIF = info.shift;
 
-  // Update tampilan label shift
   const shiftNow = document.getElementById('shiftNow');
   if (shiftNow) shiftNow.textContent = `Aktif: ${SHIFT_AKTIF}`;
 
-  // Ubah warna tombol sesuai shift aktif
   const btn1 = document.getElementById('btnShift1');
   const btn2 = document.getElementById('btnShift2');
   if (btn1 && btn2) {
@@ -1172,25 +1281,28 @@ function autoShiftUpdate() {
     btn2.style.outline = SHIFT_AKTIF === 2 ? '2px solid var(--accent)' : 'none';
   }
 
-  // Nonaktifkan tombol agar tidak bisa diubah manual
   if (btn1) btn1.disabled = true;
   if (btn2) btn2.disabled = true;
 
-  // Update tanggal kerja otomatis
   const tanggalEl = document.getElementById('tanggalNow');
   if (tanggalEl) tanggalEl.value = info.tanggal;
 }
 
 // ==== INIT ====
-autoShiftUpdate();
-setInterval(autoShiftUpdate, 60000); // update tiap 1 menit
-
-render();
-(function initEquipment(){
-  const saved=localStorage.getItem(KEY_EQUIPMENT);
-  if(saved){
-    document.getElementById('equipmentId').value=saved;
-    document.getElementById('equipmentNow').textContent="Aktif: "+saved;
+(async function init(){
+  try {
+    await autoShiftUpdate();
+    setInterval(async ()=>{await autoShiftUpdate();}, 60000);
+    await migrateFromLocalStorage();
+    await render();
+    const saved = await getEquipmentId();
+    if(saved){
+      document.getElementById('equipmentId').value=saved;
+      document.getElementById('equipmentNow').textContent="Aktif: "+saved;
+    }
+  } catch(err) {
+    console.error('Init error:', err);
+    showPopup('Aplikasi gagal dimuat: ' + err.message, 'error');
   }
 })();
 

@@ -7,11 +7,10 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './style.css',
-  './script.js',
   './logo-harita-group.jpg',
   'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
-  'https://cdn.jsdelivr.net/npm/@tmcw/togeojson@7.1.2/dist/togeojson.umd.min.js'
+  'https://cdn.jsdelivr.net/npm/@tmcw/togeojson@7.1.2/dist/togeojson.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/dexie@3.2.7/dist/dexie.min.js'
 ];
 
 // Install - cache assets
