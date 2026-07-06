@@ -1,0 +1,13 @@
+{
+  "name": "Form Daily Input Equipment",
+  "short_name": "Equipment",
+  "description": "Form Daily Input Ritase shift 1/2, bisa offline",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+  ],
+  "splash_pages": null
+}
