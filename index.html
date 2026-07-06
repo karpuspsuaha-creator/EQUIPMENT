@@ -997,7 +997,7 @@ async function render(){
 
   let data = arr;
   if(fs) data = data.filter(x => String(x.shift) === String(fs));
-  if(fd) data = data.filter(x => x.toggle === fd);
+  if(fd) data = data.filter(x => x.tanggal === fd);
 
   document.getElementById('totalInfo').textContent = `${data.length} data`;
 
@@ -1097,6 +1097,251 @@ window.onload = async () => {
   }
   render();
 };
+
+// ==== RESIZE FOTO ====
+function convertToWebP(file, quality = 1.0) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        blob => {
+          URL.revokeObjectURL(url);
+          if (blob) resolve(blob);
+          else reject(new Error('Gagal konversi ke WebP'));
+        },
+        'image/webp',
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Gagal load foto untuk konversi'));
+    };
+    img.src = url;
+  });
+}
+
+// ==== EXPORT TO EXCEL + PHOTOS ZIP ====
+async function exportCSVFiltered(){
+  const arr = await load();
+  if(!arr.length){showPopup('Belum ada data.','error');return;}
+  const fs=document.getElementById('filterShift').value;
+  const fd=document.getElementById('filterDate').value;
+  let data=arr;
+  if(fs)data=data.filter(x=>String(x.shift)===String(fs));
+  if(fd)data=data.filter(x=>x.tanggal===fd);
+  if(!data.length){showPopup('Data sesuai filter kosong.','error');return;}
+
+const wsData=data.map(r=>{
+      const hauler = r.hauler || '-';
+      return {
+        'Tanggal': r.tanggal||'',
+        'Jam': r.jam||'',
+        'Shift': r.shift||'',
+        'ID Equipment': r.equipment||'',
+        'Code Unit': hauler,
+        'Category': r.category||'',
+        'Unit Running': r.unitRunning||'-',
+        'Unit No Running': r.unitNoRunning||'-',
+        'Keterangan': r.keterangan||'',
+        'User Location': r.locationArea || '-',
+        'User Latitude': r.lat ? Number(r.lat.toFixed(5)) : '',
+        'User Longitude': r.lon ? Number(r.lon.toFixed(5)) : '',
+        'Unit Location': r.unitLocationArea || '-',
+        'Unit Latitude': r.unitLat ? Number(r.unitLat.toFixed(5)) : '',
+        'Unit Longitude': r.unitLon ? Number(r.unitLon.toFixed(5)) : '',
+        'Foto': r.photo ? r.photo : '-'
+      };
+    });
+
+const ws=XLSX.utils.json_to_sheet(wsData);
+    ws['!cols'] = Object.keys(wsData[0] || {}).map(k => ({
+      wch: Math.max(
+        k.length,
+        ...wsData.map(r => String(r[k] ?? '').length)
+      ) + 4
+    }));
+
+    const now = new Date();
+    const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+    const equip = (await getEquipmentId()).replace(/[^a-zA-Z0-9_-]/g, '');
+    const shiftFilter = document.getElementById('filterShift').value;
+    const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
+
+    const filteredPhotoNames = new Set();
+    data.forEach(r => {
+      if (r.photo) {
+        filteredPhotoNames.add(r.photo);
+      }
+    });
+
+    const existingPhotoNames = new Set();
+    for (const name of filteredPhotoNames) {
+      const photo = await db.photos_v1.get(name);
+      if (photo && photo.blob) {
+        existingPhotoNames.add(name);
+      }
+    }
+
+    // Tambah hyperlink hanya untuk foto yang ada di IndexedDB
+    const headers = Object.keys(wsData[0] || {});
+    const fotoCol = headers.indexOf("Foto");
+    ws['!links'] = [];
+    if (fotoCol !== -1) {
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      if (range.e.r >= 1) {
+        for (let R = 1; R <= range.e.r; R++) {
+          const cellRef = XLSX.utils.encode_cell({r: R, c: fotoCol});
+          const cell = ws[cellRef];
+          if (!cell || !cell.v || String(cell.v) === '-') continue;
+          if (!existingPhotoNames.has(cell.v)) continue;
+          cell.l = { Target: 'photos/' + cell.v };
+          ws['!links'].push({ ref: cellRef, Target: 'photos/' + cell.v });
+        }
+      }
+    }
+
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
+
+    if (existingPhotoNames.size > 0 && window.JSZip) {
+      downloadCombinedZip(wb, existingPhotoNames, dateName, shiftName, equip).then(() => {
+        showPopup('Data berhasil diexport ke ZIP!','success');
+      }).catch(err => {
+        console.error(err);
+        showPopup('Export ZIP gagal: ' + err.message, 'error');
+      });
+    } else {
+      XLSX.writeFile(wb, `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`);
+      showPopup('Data berhasil diexport ke Excel!','success');
+    }
+  }
+
+async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
+  return new Promise((resolve, reject) => {
+    const zip = new JSZip();
+    const photosFolder = zip.folder('photos');
+
+    const promises = Array.from(photoNames).map(name =>
+    db.photos_v1.get(name).then(photo => {
+      if (photo && photo.blob) {
+        return convertToWebP(photo.blob, 1.0).then(webpBlob => {
+          photosFolder.file(name, webpBlob);
+        }).catch(() => {
+          photosFolder.file(name, photo.blob);
+        });
+      }
+    })
+  );
+
+    Promise.all(promises).then(() => {
+      const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
+      const fileName = `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`;
+      zip.file(fileName, wbout, {base64: true});
+
+      zip.generateAsync({type:'blob'}).then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Export_${equip || 'ALL'}_${dateName}_${shiftName}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        resolve();
+      }).catch(err => {
+        reject(err);
+      });
+    }).catch(err => {
+      reject(err);
+    });
+  });
+}
+
+// ==== EQUIPMENT ====
+async function setEquipmentId(id){
+  if(!id)return;
+  await setEquipmentSetting(id);
+  document.getElementById('equipmentNow').textContent="Aktif: "+id;
+}
+
+async function autoShiftUpdate() {
+  const info = getShiftAndTanggalKerja();
+  SHIFT_AKTIF = info.shift;
+
+  const shiftNow = document.getElementById('shiftNow');
+  if (shiftNow) shiftNow.textContent = `Aktif: ${SHIFT_AKTIF}`;
+
+  const btn1 = document.getElementById('btnShift1');
+  const btn2 = document.getElementById('btnShift2');
+  if (btn1 && btn2) {
+    btn1.style.outline = SHIFT_AKTIF === 1 ? '2px solid var(--accent)' : 'none';
+    btn2.style.outline = SHIFT_AKTIF === 2 ? '2px solid var(--accent)' : 'none';
+  }
+
+  if (btn1) btn1.disabled = true;
+  if (btn2) btn2.disabled = true;
+
+  const tanggalEl = document.getElementById('tanggalNow');
+  if (tanggalEl) tanggalEl.value = info.tanggal;
+}
+
+// ==== INIT ====
+(async function init(){
+  try {
+    await autoShiftUpdate();
+    setInterval(async ()=>{await autoShiftUpdate();}, 60000);
+    await migrateFromLocalStorage();
+    await render();
+    const saved = await getEquipmentId();
+    if(saved){
+      document.getElementById('equipmentId').value=saved;
+      document.getElementById('equipmentNow').textContent="Aktif: "+saved;
+    }
+  } catch(err) {
+    console.error('Init error:', err);
+    showPopup('Aplikasi gagal dimuat: ' + err.message, 'error');
+  }
+})();
+
+// ==== GPS ====
+if("geolocation"in navigator){
+  navigator.geolocation.watchPosition(
+    pos=>{
+      lokasiTerakhir.lat=pos.coords.latitude;
+      lokasiTerakhir.lon=pos.coords.longitude;
+      document.getElementById("lokasiInfo").textContent=`GPS: ${lokasiTerakhir.lat.toFixed(5)}, ${lokasiTerakhir.lon.toFixed(5)}`;
+      if (window.updateUserMarker) {
+        window.updateUserMarker(lokasiTerakhir.lat, lokasiTerakhir.lon);
+      }
+    },
+    err=>{document.getElementById("lokasiInfo").textContent="GPS Error: "+err.message;},
+    {enableHighAccuracy:true,maximumAge:0,timeout:15000}
+  );
+}else{
+  document.getElementById("lokasiInfo").textContent="GPS tidak tersedia";
+}
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('✅ Service Worker aktif, siap offline'))
+    .catch(err => console.error('Service Worker gagal:', err));
+}
+</script>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@7.1.2/dist/togeojson.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="Geomap.js"></script>
 </body>
 </html>
