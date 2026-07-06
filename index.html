@@ -507,25 +507,25 @@ body::after {
       <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
     </div>
 
-<div class="col-12" style="margin-top:16px;">
-       <button class="btn primary" style="width:100%;" onclick="simpan()">Simpan</button>
-     </div>
+<div class="col-12" style="margin-top:12px;">
+      <label>Foto Unit (opsional)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn secondary" onclick="document.getElementById('photoInput').click()" style="width:auto;">
+          Ambil Foto
+        </button>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this.files[0])">
+        <button class="btn secondary" id="btnClearPhoto" onclick="clearPhoto()" style="width:auto;display:none;">
+          Hapus Foto
+        </button>
+      </div>
+      <div id="photoPreview" style="margin-top:8px;display:none;">
+        <img id="photoImg" style="max-width:100%;max-height:150px;border-radius:8px;">
+      </div>
+      <div class="chip" id="photoStatus" style="margin-top:4px;display:none;">Foto siap disimpan</div>
+    </div>
 
-     <div class="col-12" style="margin-top:12px;">
-       <label>Foto Unit (opsional)</label>
-       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-         <button class="btn secondary" onclick="document.getElementById('photoInput').click()" style="width:auto;">
-           Ambil Foto
-         </button>
-         <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this.files[0])">
-         <button class="btn secondary" id="btnClearPhoto" onclick="clearPhoto()" style="width:auto;display:none;">
-           Hapus Foto
-         </button>
-       </div>
-       <div id="photoPreview" style="margin-top:8px;display:none;">
-         <img id="photoImg" style="max-width:100%;max-height:150px;border-radius:8px;">
-       </div>
-       <div class="chip" id="photoStatus" style="margin-top:4px;display:none;">Foto siap disimpan</div>
+    <div class="col-12" style="margin-top:16px;">
+       <button class="btn primary" style="width:100%;" onclick="simpan()">Simpan</button>
      </div>
    </div>
 
