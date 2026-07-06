@@ -2,7 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 1. PENTING: Meta viewport agar pas dengan lebar layar HP -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Form Daily Input Equipment</title>
 <meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="manifest.json" />
@@ -25,14 +26,31 @@
   --shadow:0 8px 25px rgba(0,0,0,0.35);
 }
 *{box-sizing:border-box}
-html,body{height:100%}
-body{
+
+/* 2. PERBAIKAN CORE: Mencegah halaman melar melampaui lebar HP */
+html,body{
+  height:100%;
+  width:100%;
   margin:0;
+  padding:0;
+  overflow-x:hidden; 
+}
+body{
   background:linear-gradient(160deg,#0b1020,#0f172a 60%,#111827);
+  background-color: #0f172a; 
+  background: url('Generated_Image.png') no-repeat center center fixed;
+  background-size: cover; 
+  background-position: center top;
+  background-attachment: fixed;
   color:var(--text);
   font:16px/1.5 "Inter",system-ui,Segoe UI,Roboto,Arial;
 }
-.container{max-width:1100px;margin:24px auto;padding:16px}
+.container{
+  max-width:1100px;
+  margin:150px auto 24px auto;
+  padding:16px;
+  width:100%;
+}
 .grid{display:grid;gap:16px}
 .card{
   background:var(--card);
@@ -42,6 +60,7 @@ body{
   backdrop-filter:blur(12px) saturate(160%);
   box-shadow:0 8px 25px rgba(0,0,0,0.35);
   transition:transform .2s ease,box-shadow .3s ease;
+  width:100%;
 }
 .card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.45)}
 h1{font-size:24px;margin:0 0 10px;font-weight:600}
@@ -77,6 +96,7 @@ input:focus,select:focus{
 .btn.warn:hover{background:#d97706}
 .btn.danger{background:var(--danger)}
 .btn.danger:hover{background:#dc2626}
+
 .table{width:100%;border-collapse:separate;border-spacing:0;}
 .table th,.table td{
   padding:10px 8px;border-bottom:1px solid var(--border);
@@ -96,7 +116,13 @@ input:focus,select:focus{
 }
 .filters{display:flex;gap:8px;flex-wrap:wrap}
 
-/* RESPONSIVE BREAKPOINTS */
+/* 3. PERBAIKAN RESPONSIVE LAYOUT FORM & TABEL */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width:1024px){
   .col-3{grid-column:span 4}
   .col-4{grid-column:span 6}
@@ -105,12 +131,12 @@ input:focus,select:focus{
 }
 
 @media (max-width:768px){
-  .row{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr; gap:10px;}
   .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1}
-  .table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  .actions { width: 100%; }
+  .btn { width: 100%; text-align: center; }
+  .filters { flex-direction: column; width: 100%; }
+  .filters select, .filters input, .filters button { width: 100%; }
 }
 
 .action-bar {
@@ -120,18 +146,6 @@ input:focus,select:focus{
   gap: 12px;
   padding-top: 20px;
   border-top: 1px dashed var(--border);
-}
-body {
-  height: 100%;
-  background-color: #0f172a; 
-  background: url('Generated_Image.png') no-repeat center center fixed;
-  background-size: cover; 
-  background-position: center top;
-  background-attachment: fixed;
-  color: #f9fafb;
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
 }
 
 main, .container, .content, #app {
@@ -231,8 +245,9 @@ body::after {
   font-display: swap;
 }
 
+/* 4. PERBAIKAN HEADER: Memastikan lebar 100% penuh dan aman */
 #headerLogo {
-  position: sticky;
+  position: fixed; /* Berubah menjadi fixed agar konsisten menempel penuh di atas */
   top: 0;
   left: 0;
   width: 100%;
@@ -241,11 +256,12 @@ body::after {
   justify-content: center;
   gap: 16px;
   z-index: 999;
-  background: rgba(15,23,42,0.85);
+  background: rgba(15,23,42,0.95);
   padding: 14px 24px;
   border-bottom: 2px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(10px);
   box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+  box-sizing: border-box;
 }
 
 #logoPerusahaan {
@@ -268,20 +284,14 @@ body::after {
   transition: all 0.3s ease;
 }
 
-.container {
-  max-width: 1100px;
-  margin: 150px auto 24px auto;
-  padding: 16px;
-}
-
 @media (max-width: 768px) {
   #headerLogo {
     padding: 10px 16px;
     gap: 10px;
   }
-  #logoPerusahaan { height: 70px; }
-  #namaPerusahaan { font-size: 26px; }
-  .container { margin-top: 110px; }
+  #logoPerusahaan { height: 60px; }
+  #namaPerusahaan { font-size: 24px; }
+  .container { margin-top: 100px; }
 }
 
 @media (max-width: 480px) {
@@ -289,9 +299,9 @@ body::after {
     padding: 8px 10px;
     gap: 8px;
   }
-  #logoPerusahaan { height: 55px; }
-  #namaPerusahaan { font-size: 20px; }
-  .container { margin-top: 95px; }
+  #logoPerusahaan { height: 45px; }
+  #namaPerusahaan { font-size: 18px; }
+  .container { margin-top: 85px; }
 }
 
 #popupModal {
@@ -491,7 +501,8 @@ body::after {
 
     <div class="col-12" style="margin-top:16px;">
       <label>Pilih Titik Lokasi (klik peta)</label>
-      <div id="map" style="height:500px;border-radius:12px;margin-top:6px;width:100%;"></div>
+      <!-- Memastikan peta responsive lebar 100% dan set tinggi aman untuk layar HP -->
+      <div id="map" style="height:350px; max-height:70vh; border-radius:12px; margin-top:6px; width:100%;"></div>
       <div class="chip" id="areaName" style="margin-top:6px;">User Location: -</div>
       <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
     </div>
@@ -968,7 +979,7 @@ document.addEventListener('keydown',e=>{
 });
 
 function escapeHtml(s){
-  return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;"}[c]));
+  return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
 }
 
 async function render(){
@@ -986,7 +997,7 @@ async function render(){
 
   let data = arr;
   if(fs) data = data.filter(x => String(x.shift) === String(fs));
-  if(fd) data = data.filter(x => x.tanggal === fd);
+  if(fd) data = data.filter(x => x.toggle === fd);
 
   document.getElementById('totalInfo').textContent = `${data.length} data`;
 
