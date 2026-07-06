@@ -577,7 +577,7 @@ body::after {
 </div>
 <div style="margin-top:24px" class="actions">
   <button class="btn secondary" onclick="hapusSemua()">Hapus Semua</button>
-  <button class="btn warn" onclick="exportCSVFiltered()" style="margin-left:auto;">Export to Excel</button>
+  <button class="btn warn" onclick="exportCSVFiltered()" style="margin-left:auto;">Export to ZIP</button>
 </div>
 <div class="footer">Data disimpan di browser (localStorage). Bisa dipakai offline.</div>
 </div>
@@ -644,7 +644,14 @@ function handlePhoto(file) {
 function generatePhotoName() {
   const haulerNo = document.getElementById('haulerNo').value.trim() || 'unit';
   const haulerPrefix = document.getElementById('haulerPrefix').value.trim() || '';
-  const haulerFull = haulerPrefix ? `${haulerPrefix}-${haulerNo.padStart(3,'0')}` : haulerNo;
+  
+  // Cari kode lengkap dari master unit jika ada
+  let haulerFull = haulerPrefix ? `${haulerPrefix}-${haulerNo.padStart(3,'0')}` : haulerNo;
+  if (haulerPrefix && MASTER_UNITS[haulerPrefix]) {
+    const found = MASTER_UNITS[haulerPrefix].find(item => item.endsWith(`-${haulerNo.padStart(3,'0')}`));
+    if (found) haulerFull = found;
+  }
+  
   const shiftInfo = getShiftAndTanggalKerja();
   let baseName = `${haulerFull}_${shiftInfo.tanggal}_S${shiftInfo.shift}`;
   
@@ -1017,7 +1024,7 @@ function hapusSemua(){
   });
 }
 
-// ==== EXPORT TO EXCEL ====
+// ==== EXPORT TO EXCEL + PHOTOS ZIP ====
 function exportCSVFiltered(){
   const arr=load();
   if(!arr.length){showPopup('Belum ada data.','error');return;}
@@ -1029,74 +1036,116 @@ function exportCSVFiltered(){
   if(!data.length){showPopup('Data sesuai filter kosong.','error');return;}
 
 const wsData=data.map(r=>{
-     const hauler = r.hauler || '-';
-     return {
-       'Tanggal': r.tanggal||'',
-       'Jam': r.jam||'',
-       'Shift': r.shift||'',
-       'ID Equipment': r.equipment||'',
-       'Code Unit': hauler,
-       'Category': r.category||'',
-       'Unit Running': r.unitRunning||'-',
-       'Unit No Running': r.unitNoRunning||'-',
-       'Keterangan': r.keterangan||'',
-       'User Location': r.locationArea || '-',
-       'User Latitude': r.lat ? Number(r.lat.toFixed(5)) : '',
-       'User Longitude': r.lon ? Number(r.lon.toFixed(5)) : '',
-       'Unit Location': r.unitLocationArea || '-',
-       'Unit Latitude': r.unitLat ? Number(r.unitLat.toFixed(5)) : '',
-       'Unit Longitude': r.unitLon ? Number(r.unitLon.toFixed(5)) : '',
-       'Foto': r.photo ? 'Ada foto' : '-'
-     };
-   });
+      const hauler = r.hauler || '-';
+      return {
+        'Tanggal': r.tanggal||'',
+        'Jam': r.jam||'',
+        'Shift': r.shift||'',
+        'ID Equipment': r.equipment||'',
+        'Code Unit': hauler,
+        'Category': r.category||'',
+        'Unit Running': r.unitRunning||'-',
+        'Unit No Running': r.unitNoRunning||'-',
+        'Keterangan': r.keterangan||'',
+        'User Location': r.locationArea || '-',
+        'User Latitude': r.lat ? Number(r.lat.toFixed(5)) : '',
+        'User Longitude': r.lon ? Number(r.lon.toFixed(5)) : '',
+        'Unit Location': r.unitLocationArea || '-',
+        'Unit Latitude': r.unitLat ? Number(r.unitLat.toFixed(5)) : '',
+        'Unit Longitude': r.unitLon ? Number(r.unitLon.toFixed(5)) : '',
+        'Foto': r.photo ? r.photo : '-'
+      };
+    });
 
 const ws=XLSX.utils.json_to_sheet(wsData);
-   ws['!cols'] = Object.keys(wsData[0] || {}).map(k => ({
-     wch: Math.max(
-       k.length,
-       ...wsData.map(r => String(r[k] ?? '').length)
-     ) + 4
-   }));
+    ws['!cols'] = Object.keys(wsData[0] || {}).map(k => ({
+      wch: Math.max(
+        k.length,
+        ...wsData.map(r => String(r[k] ?? '').length)
+      ) + 4
+    }));
 
-   const now = new Date();
-   const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
-   const equip = (localStorage.getItem(KEY_EQUIPMENT) || '').replace(/[^a-zA-Z0-9_-]/g, '');
-   const shiftFilter = document.getElementById('filterShift').value;
-   const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
+    // Tambah hyperlink untuk kolom Foto (path relatif ke folder photos)
+    const headers = Object.keys(wsData[0] || {});
+    const fotoCol = headers.indexOf("Foto");
+    ws['!links'] = [];
+    if (fotoCol !== -1) {
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      if (range.e.r >= 1) {
+        for (let R = 1; R <= range.e.r; R++) {
+          const cellRef = XLSX.utils.encode_cell({r: R, c: fotoCol});
+          const cell = ws[cellRef];
+          if (!cell || !cell.v || String(cell.v) === '-') continue;
+          cell.l = { Target: 'photos/' + cell.v };
+          ws['!links'].push({ ref: cellRef, Target: 'photos/' + cell.v });
+        }
+      }
+    }
 
-   // Download ZIP berisi semua foto jika ada
-   const photos = loadPhotos();
-   const filteredPhotos = {};
-   data.forEach(r => {
-     if (r.photo && photos[r.photo]) {
-       filteredPhotos[r.photo] = photos[r.photo];
-     }
-   });
+    const now = new Date();
+    const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+    const equip = (localStorage.getItem(KEY_EQUIPMENT) || '').replace(/[^a-zA-Z0-9_-]/g, '');
+    const shiftFilter = document.getElementById('filterShift').value;
+    const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
 
-   if (Object.keys(filteredPhotos).length > 0 && window.JSZip) {
-     downloadPhotosZip(filteredPhotos, dateName, shiftName);
-   }
+    // Ambil foto yang terfilter
+    const photos = loadPhotos();
+    const filteredPhotos = {};
+    data.forEach(r => {
+      if (r.photo && photos[r.photo]) {
+        filteredPhotos[r.photo] = photos[r.photo];
+      }
+    });
 
-   const wb=XLSX.utils.book_new();
-   XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
-   XLSX.writeFile(wb, `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`);
-   showPopup('Data berhasil diexport ke Excel!','success');
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
+
+    if (Object.keys(filteredPhotos).length > 0 && window.JSZip) {
+      // Membuat ZIP berisi Excel dan folder photos
+      downloadCombinedZip(wb, filteredPhotos, dateName, shiftName, equip).then(() => {
+        showPopup('Data berhasil diexport ke ZIP!','success');
+      }).catch(err => {
+        console.error(err);
+        showPopup('Export ZIP gagal: ' + err.message, 'error');
+      });
+    } else {
+      // Tanpa foto, langsung download Excel
+      XLSX.writeFile(wb, `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`);
+      showPopup('Data berhasil diexport ke Excel!','success');
+    }
 }
 
-function downloadPhotosZip(photos, dateName, shiftName) {
-  const zip = new JSZip();
-  Object.keys(photos).forEach(name => {
-    const dataUrl = photos[name];
-    const base64 = dataUrl.split(',')[1];
-    zip.file(name, base64, {base64: true});
-  });
-  zip.generateBlob().then(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Photos_${dateName}_${shiftName}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+function downloadCombinedZip(wb, photos, dateName, shiftName, equip) {
+  return new Promise((resolve, reject) => {
+    const zip = new JSZip();
+    
+    // Tambahkan folder photos dengan semua foto
+    const photosFolder = zip.folder('photos');
+    Object.keys(photos).forEach(name => {
+      const dataUrl = photos[name];
+      const base64 = dataUrl.split(',')[1];
+      photosFolder.file(name, base64, {base64: true});
+    });
+
+    // Konversi workbook ke binary dan tambahkan ke ZIP
+    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
+    const fileName = `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`;
+    zip.file(fileName, wbout, {base64: true});
+
+    zip.generateAsync({type:'blob'}).then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `Export_${equip || 'ALL'}_${dateName}_${shiftName}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      resolve();
+    }).catch(err => {
+      reject(err);
+    });
   });
 }
 
