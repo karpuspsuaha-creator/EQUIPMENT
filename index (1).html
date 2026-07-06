@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Daily Input Equipment</title>
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json" />
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<!-- Font elegan untuk nama perusahaan -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ==== CSS ==== */
+:root{
+  --bg:#0f172a;
+  --card:rgba(17,24,39,0.7);
+  --muted:#94a3b8;
+  --text:#e5e7eb;
+  --accent:#22c55e;
+  --accent-2:#38bdf8;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --border:rgba(255,255,255,0.08);
+  --shadow:0 8px 25px rgba(0,0,0,0.35);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:linear-gradient(160deg,#0b1020,#0f172a 60%,#111827);
+  color:var(--text);
+  font:16px/1.5 "Inter",system-ui,Segoe UI,Roboto,Arial;
+}
+.container{max-width:1100px;margin:24px auto;padding:16px}
+.grid{display:grid;gap:16px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:20px;
+  backdrop-filter:blur(12px) saturate(160%);
+  box-shadow:0 8px 25px rgba(0,0,0,0.35);
+  transition:transform .2s ease,box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.45)}
+h1{font-size:24px;margin:0 0 10px;font-weight:600}
+h2{font-size:18px;margin:0 0 14px;color:var(--muted);font-weight:500}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+input,select,button{
+  width:100%;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--border);background:#0b1222;color:var(--text);
+  transition:all .2s ease;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:var(--accent-2);
+  box-shadow:0 0 0 2px rgba(56,189,248,.4);
+}
+.row{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.col-3{grid-column:span 3}
+.col-4{grid-column:span 4}
+.col-6{grid-column:span 6}
+.col-8{grid-column:span 8}
+.col-12{grid-column:span 12}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+   cursor:pointer;border:none;font-weight:600;
+   padding:10px 16px;border-radius:12px;transition:all .2s ease;
+   width:auto;
+}
+.btn.primary{background:var(--accent);color:#052e16}
+.btn.primary:hover{background:#16a34a}
+.btn.secondary{background:#0b1222;border:1px solid var(--border)}
+.btn.secondary:hover{background:#1e293b}
+.btn.warn{background:var(--warning);color:#1f1300}
+.btn.warn:hover{background:#d97706}
+.btn.danger{background:var(--danger)}
+.btn.danger:hover{background:#dc2626}
+.table{width:100%;border-collapse:separate;border-spacing:0;}
+.table th,.table td{
+  padding:10px 8px;border-bottom:1px solid var(--border);
+  text-align:left;font-size:14px
+}
+.table th{color:var(--muted);font-weight:600}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px}
+.badge.s1{background:#0b3b1d;color:#86efac;border:1px solid #14532d}
+.badge.s2{background:#132a46;color:#93c5fd;border:1px solid #1e3a8a}
+.muted{color:var(--muted)}
+.right{display:flex;justify-content:flex-end}
+.nowrap{white-space:nowrap}
+.footer{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
+.chip{
+  background:#0b1222;border:1px solid var(--border);
+  padding:6px 12px;border-radius:999px;font-size:13px
+}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width:1024px){
+  .col-3{grid-column:span 4}
+  .col-4{grid-column:span 6}
+  .col-6{grid-column:span 12}
+  .col-8{grid-column:span 12}
+}
+
+@media (max-width:768px){
+  .row{grid-template-columns:1fr}
+  .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1}
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.action-bar {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border);
+}
+body {
+  height: 100%;
+  background-color: #0f172a; 
+  background: url('Generated_Image.png') no-repeat center center fixed;
+  background-size: cover; 
+  background-position: center top;
+  background-attachment: fixed;
+  color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+main, .container, .content, #app {
+  background: transparent;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+    background-position: center center;
+  }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45); 
+  z-index: -1;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, rgba(15,23,42,0) 0%, rgba(15,23,42,1) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#lokasiInfo {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  border-radius: 12px;
+  padding: 8px 14px;
+  position: absolute;
+  top: 135px;
+  right: 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+#lokasiInfo:hover {
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.small-input {
+  font-size: 16px;
+  transform: scale(0.9);
+  transform-origin: left center;
+}
+
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important; 
+  }
+  #lokasiInfo {
+    position: static;
+    margin: 10px auto;
+    text-align: center;
+    width: fit-content;
+  }
+}
+
+.chip {
+  display: inline-block;
+  font-size: 14px;           
+  padding: 6px 10px;         
+  border-radius: 4px;
+  background: #0f172a;       
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;    
+  white-space: normal;
+}
+
+.chip:focus {
+  outline: none;
+  transform: scale(1);
+}
+
+@font-face {
+  font-family: 'Ovidius Script';
+  src: url('OvidiusScript.ttf') format('truetype');
+  font-display: swap;
+}
+
+#headerLogo {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 999;
+  background: rgba(15,23,42,0.85);
+  padding: 14px 24px;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+}
+
+#logoPerusahaan {
+  height: 90px;
+  width: auto;
+  border-radius: 10px;
+  background: #fff;
+  padding: 6px;
+  box-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 18px rgba(0,0,0,0.35);
+  transition: all 0.3s ease;
+}
+
+#namaPerusahaan {
+  font-family: 'Ovidius Script', cursive;
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  color: #f8f8f8;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px rgba(200, 200, 255, 0.25);
+  transition: all 0.3s ease;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 150px auto 24px auto;
+  padding: 16px;
+}
+
+@media (max-width: 768px) {
+  #headerLogo {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  #logoPerusahaan { height: 70px; }
+  #namaPerusahaan { font-size: 26px; }
+  .container { margin-top: 110px; }
+}
+
+@media (max-width: 480px) {
+  #headerLogo {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  #logoPerusahaan { height: 55px; }
+  #namaPerusahaan { font-size: 20px; }
+  .container { margin-top: 95px; }
+}
+
+#popupModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 250px;
+  max-width: 90%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  color: var(--text);
+  padding: 20px;
+  display: none;
+  z-index: 9999;
+  text-align: center;
+}
+#popupModal .icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+#popupModal .icon.success { color: #22c55e; }
+#popupModal .icon.error { color: #ef4444; }
+#popupModal .msg { font-size: 16px; margin-bottom: 12px; }
+#popupModal .closeBtn {
+  cursor: pointer;
+  background: #1e293b;
+  color: var(--text);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+#popupModal .closeBtn:hover { background: #111827; }
+
+#popupConfirm {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+#popupConfirm.active { opacity: 1; pointer-events: auto; }
+#popupConfirm .content {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  min-width: 250px;
+  max-width: 90%;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+#popupConfirm .content .actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.kmz-tooltip {
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.kmz-tooltip::before {
+  display: none;
+}
+
+.leaflet-overlay-pane path {
+  pointer-events: none !important;
+}
+</style>
+</head>
+<body>
+
+<div id="headerLogo">
+  <img src="logo-harita-group.jpg" alt="Logo Harita Group" id="logoPerusahaan">
+  <span id="namaPerusahaan"><span style="letter-spacing:3px;">&nbsp;</span> MCR AJA</span>
+</div>
+
+<div id="lokasiInfo">GPS: mencari...</div>
+<div class="container grid">
+<div class="card">
+<h1>Form Daily Input Equipment</h1>
+<h2>Waktu & lokasi tercatat otomatis</h2>
+<div class="row">
+<div class="col-4">
+<label>Shift</label>
+<div class="actions">
+<button class="btn secondary" id="btnShift1" onclick="setShift(1)">Shift 1</button>
+<button class="btn secondary" id="btnShift2" onclick="setShift(2)">Shift 2</button>
+</div>
+</div>
+<div class="col-4">
+<label>Tanggal (otomatis)</label>
+<input id="tanggalNow" type="text" disabled />
+</div>
+<div class="col-4">
+<label>Jam (otomatis)</label>
+<input id="jamNow" type="text" disabled />
+</div>
+</div>
+
+<div class="row" style="margin-top:8px">
+  <div class="col-4">
+    <label>ID Equipment</label>
+    <select id="equipmentId" onchange="setEquipmentId(this.value)">
+      <option value="">-- Pilih ID --</option>
+      <option value="ABIEL">ABIEL</option>
+      <option value="ASDAR">ASDAR</option>
+      <option value="ARIF">ARIF</option>
+      <option value="JAKARIA">JAKARIA</option>
+      <option value="RIDHO">RIDHO</option>
+      <option value="WAHYUDI">WAHYUDI</option>
+      <option value="E07">E07</option>
+      <option value="E08">E08</option>
+      <option value="E09">E09</option>
+      <option value="E10">E10</option>
+    </select>
+    <div class="chip" id="equipmentNow">Belum dipilih</div>
+  </div>
+</div>
+
+<div class="row" style="margin-top:8px">
+  <div class="col-4">
+    <label>Unit</label>
+    <div style="display:flex;gap:6px">
+      <select id="haulerPrefix" style="width:100px" onchange="updateHaulerOutput()">
+        <option value="">--</option>
+        <option value="AHG">AHG</option>
+        <option value="AKs">AKs</option>
+        <option value="BKM">BKM</option>
+        <option value="BSS">BSS</option>
+        <option value="HER">HER</option>
+        <option value="KTU">KTU</option>
+        <option value="LMP">LMP</option>
+        <option value="PIK">PIK</option>
+        <option value="WWP">WWP</option>
+      </select>
+      <input id="haulerNo" placeholder="100"
+        style="flex:1; font-size:16px; padding:6px 8px; border-radius:6px; box-sizing:border-box;"
+        oninput="updateHaulerOutput()" />
+    </div>
+    <div id="unitSuggest" style="
+      background:#0b1222;
+      border:1px solid var(--border);
+      border-radius:8px;
+      margin-top:4px;
+      display:none;
+      max-height:120px;
+      overflow:auto;
+    "></div>
+    <div class="chip" id="haulerOutput" style="margin-top:6px;">–</div>
+  </div>
+  <div class="col-4">
+    <label>Category</label>
+    <select id="category">
+      <option value="">-- Pilih Category --</option>
+      <option value="Working">Working</option>
+      <option value="Breakdown">Breakdown</option>
+      <option value="No Operator">No Operator</option>
+      <option value="No Job">No Job</option>
+    </select>
+  </div>
+  <div class="col-4">
+      <label>Keterangan</label>
+      <input id="keterangan" placeholder="Isi keterangan tambahan...">
+    </div>
+    <div class="col-12">
+      <label>Boundary Area (KMZ)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn secondary" onclick="document.getElementById('kmzInput').click()" style="width:auto;">
+          Upload KMZ Boundary
+        </button>
+        <input type="file" id="kmzInput" accept=".kmz" style="display:none" onchange="if(this.files[0]) loadKmz(this.files[0])">
+        <button class="btn secondary" id="btnClearKmz" onclick="clearKmz()" style="width:auto;display:none;">
+          Hapus Boundary
+        </button>
+      </div>
+    </div>
+
+    <div class="col-12" style="margin-top:16px;">
+      <label>Pilih Titik Lokasi (klik peta)</label>
+      <div id="map" style="height:500px;border-radius:12px;margin-top:6px;width:100%;"></div>
+      <div class="chip" id="areaName" style="margin-top:6px;">User Location: -</div>
+      <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
+    </div>
+
+<div class="col-12" style="margin-top:12px;">
+      <label>Foto Unit (opsional)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn secondary" onclick="document.getElementById('photoInput').click()" style="width:auto;">
+          Ambil Foto
+        </button>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this.files[0])">
+        <button class="btn secondary" id="btnClearPhoto" onclick="clearPhoto()" style="width:auto;display:none;">
+          Hapus Foto
+        </button>
+      </div>
+      <div id="photoPreview" style="margin-top:8px;display:none;">
+        <img id="photoImg" style="max-width:100%;max-height:150px;border-radius:8px;">
+      </div>
+      <div class="chip" id="photoStatus" style="margin-top:4px;display:none;">Foto siap disimpan</div>
+    </div>
+
+    <div class="col-12" style="margin-top:16px;">
+       <button class="btn primary" style="width:100%;" onclick="simpan()">Simpan</button>
+     </div>
+   </div>
+
+<div class="card" style="margin-top:24px;">
+<div class="row" style="align-items:end">
+<div class="col-8">
+<h2>Data Tersimpan</h2>
+<div class="filters">
+<select id="filterShift" onchange="render()">
+<option value="">Semua Shift</option>
+<option value="1">Shift 1</option>
+<option value="2">Shift 2</option>
+</select>
+<input type="date" id="filterDate" onchange="render()" />
+<button class="btn secondary" onclick="clearFilter()">Bersihkan Filter</button>
+</div>
+</div>
+<div class="col-4 right">
+<div class="chip" id="totalInfo">0 data</div>
+</div>
+</div>
+<div class="table-responsive" style="margin-top:8px">
+<table class="table" id="tbl">
+<thead>
+<tr>
+   <th class="nowrap">#</th>
+   <th class="nowrap">Tanggal</th>
+   <th class="nowrap">Jam</th>
+   <th>Shift</th>
+   <th>Equipment ID</th>
+   <th>Unit</th>
+   <th>Category</th>
+   <th>Unit Running</th>
+   <th>Unit No Running</th>
+   <th>Keterangan</th>
+   <th>User Location</th>
+   <th class="nowrap">User Latitude</th>
+   <th class="nowrap">User Longitude</th>
+   <th>Unit Location</th>
+   <th class="nowrap">Unit Latitude</th>
+   <th class="nowrap">Unit Longitude</th>
+   <th>Foto</th>
+   <th class="nowrap">Aksi</th>
+ </tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+<div style="margin-top:24px" class="actions">
+  <button class="btn secondary" onclick="hapusSemua()">Hapus Semua</button>
+  <button class="btn warn" onclick="exportCSVFiltered()" style="margin-left:auto;">Export to ZIP</button>
+</div>
+<div class="footer">Data disimpan di browser (IndexedDB). Bisa dipakai offline.</div>
+</div>
+</div>
+
+<div id="popupModal">
+  <div class="icon" id="popupIcon">✅</div>
+  <div class="msg" id="popupMsg">Data tersimpan!</div>
+  <button class="closeBtn" onclick="closePopup()">Tutup</button>
+</div>
+
+<div id="popupConfirm">
+  <div class="content">
+    <div class="msg" id="confirmMsg">Apakah yakin ingin menghapus data ini?</div>
+    <div class="actions">
+      <button class="btn danger" id="confirmYes">Hapus</button>
+      <button class="btn secondary" id="confirmNo">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.7/dist/dexie.min.js"></script>
+<script>
+const pad = n => String(n).padStart(2,'0');
+function getTanggal(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function getJam(d=new Date()){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;}
+
+let SHIFT_AKTIF=1;
+let lokasiTerakhir={lat:null,lon:null};
+let photoData = null;
+let photoName = null;
+let photoObjectUrls = [];
+
+const db = new Dexie('EquipmentDB');
+db.version(1).stores({
+  produksi_data_v2: '++id, tanggal, shift, equipment, hauler, photo',
+  photos_v1: 'name',
+  settings: 'key'
+});
+
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const b64 = atob(parts[1]);
+  const arr = new Uint8Array(b64.length);
+  for (let i = 0; i < b64.length; i++) {
+    arr[i] = b64.charCodeAt(i);
+  }
+  return new Blob([arr], { type: mime });
+}
+
+async function migrateFromLocalStorage(){
+  try {
+    const oldRecords = JSON.parse(localStorage.getItem('produksi_data_v2') || '[]');
+    if (oldRecords.length) {
+      await db.produksi_data_v2.clear();
+      for (const r of oldRecords) {
+        await db.produksi_data_v2.add(r);
+      }
+      localStorage.removeItem('produksi_data_v2');
+    }
+  } catch(e) { console.error('Migrasi data gagal:', e); }
+
+  try {
+    const oldPhotos = JSON.parse(localStorage.getItem('photos_v1') || '{}');
+    const photoNames = Object.keys(oldPhotos);
+    if (photoNames.length) {
+      for (const name of photoNames) {
+        try {
+          const blob = dataUrlToBlob(oldPhotos[name]);
+          await db.photos_v1.put({name: name, blob: blob});
+        } catch(e) { console.error('Migrasi foto gagal:', name, e); }
+      }
+      localStorage.removeItem('photos_v1');
+    }
+  } catch(e) { console.error('Migrasi foto gagal:', e); }
+
+  try {
+    const oldEquip = localStorage.getItem('EQUIPMENT_ID');
+    if (oldEquip) {
+      await db.settings.put({key:'EQUIPMENT_ID', value:oldEquip});
+      localStorage.removeItem('EQUIPMENT_ID');
+    }
+  } catch(e) { console.error('Migrasi equipment gagal:', e); }
+}
+
+async function load(){
+  return await db.produksi_data_v2.toArray();
+}
+async function save(arr){
+  await db.produksi_data_v2.clear();
+  for (const r of arr) await db.produksi_data_v2.add(r);
+}
+async function deleteRecord(id){return await db.produksi_data_v2.delete(id);}
+async function clearAllData(){await db.produksi_data_v2.clear();}
+
+async function getEquipmentId(){
+  const s = await db.settings.get('EQUIPMENT_ID');
+  return s ? s.value : '';
+}
+async function setEquipmentSetting(val){
+  if(!val)return;
+  await db.settings.put({key:'EQUIPMENT_ID', value:val});
+}
+
+async function loadPhotoNames(){
+  const names = [];
+  await db.photos_v1.each(photo => names.push(photo.name));
+  return names;
+}
+
+async function loadPhotoBlob(name){
+  const photo = await db.photos_v1.get(name);
+  return photo ? photo.blob : null;
+}
+
+async function handlePhoto(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    showPopup('File bukan gambar', 'error');
+    return;
+  }
+  photoData = file;
+  photoName = await generatePhotoName();
+  const url = URL.createObjectURL(file);
+  if (window.previewObjectUrl) URL.revokeObjectURL(window.previewObjectUrl);
+  window.previewObjectUrl = url;
+  document.getElementById('photoImg').src = url;
+  document.getElementById('photoPreview').style.display = 'block';
+  document.getElementById('photoStatus').textContent = 'Foto: ' + photoName;
+  document.getElementById('photoStatus').style.display = 'inline-block';
+  document.getElementById('btnClearPhoto').style.display = 'inline-block';
+}
+
+async function generatePhotoName() {
+  const haulerNo = document.getElementById('haulerNo').value.trim() || 'unit';
+  const haulerPrefix = document.getElementById('haulerPrefix').value.trim() || '';
+  
+  let haulerFull = haulerPrefix ? `${haulerPrefix}-${haulerNo.padStart(3,'0')}` : haulerNo;
+  if (haulerPrefix && MASTER_UNITS[haulerPrefix]) {
+    const found = MASTER_UNITS[haulerPrefix].find(item => item.endsWith(`-${haulerNo.padStart(3,'0')}`));
+    if (found) haulerFull = found;
+  }
+  
+  const shiftInfo = getShiftAndTanggalKerja();
+  let baseName = `${haulerFull}_${shiftInfo.tanggal}_S${shiftInfo.shift}`;
+  
+  const names = await loadPhotoNames();
+  let name = baseName + '.webp';
+  let counter = 1;
+  while (names.includes(name)) {
+    counter++;
+    name = `${baseName}(${counter}).webp`;
+  }
+  return name;
+}
+
+function clearPhoto() {
+  photoData = null;
+  photoName = null;
+  document.getElementById('photoInput').value = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoStatus').style.display = 'none';
+  document.getElementById('btnClearPhoto').style.display = 'none';
+  if (window.previewObjectUrl) {
+    URL.revokeObjectURL(window.previewObjectUrl);
+    window.previewObjectUrl = null;
+  }
+}
+
+function setShift(n){
+  SHIFT_AKTIF=(n===2)?2:1;
+  document.getElementById('btnShift1').style.outline=SHIFT_AKTIF===1?'2px solid var(--accent)':'none';
+  document.getElementById('btnShift2').style.outline=SHIFT_AKTIF===2?'2px solid var(--accent)':'none';
+  focusFirst();
+}
+
+function tick(){
+  const now=new Date();
+  document.getElementById('tanggalNow').value=getTanggal(now);
+  document.getElementById('jamNow').value=getJam(now);
+}
+setInterval(tick,1000);tick();
+
+function focusFirst(){ 
+  const el = document.getElementById('haulerPrefix');
+  if(el) el.focus();
+}
+
+async function getForm() {
+  const now = new Date();
+  const shiftInfo = getShiftAndTanggalKerja();
+
+  const haulerPrefix = document.getElementById('haulerPrefix').value.trim();
+  const haulerNo = document.getElementById('haulerNo').value.trim();
+
+  function findFullCode(prefix, code) {
+    if (!prefix || !code) return '';
+    const list = MASTER_UNITS[prefix];
+    if (!list || list.length === 0) return `${prefix}-${code}`;
+    const found = list.find(item => item.endsWith(`-${code.padStart(3, '0')}`));
+    return found || `${prefix}-${code}`;
+  }
+
+  const haulerFull = findFullCode(haulerPrefix, haulerNo);
+  const jamSekarang = getJam(now);
+  const category = document.getElementById('category').value.trim();
+
+  let unitRunning = '';
+  let unitNoRunning = '';
+
+  if (category === 'Working') {
+    unitRunning = jamSekarang;
+  }
+
+  if (category === 'Breakdown' || category === 'No Operator' || category === 'No Job') {
+    unitNoRunning = jamSekarang;
+  }
+
+  const equipment = await getEquipmentId();
+  return {
+    tanggal: shiftInfo.tanggal,
+    jam: getJam(now),
+    shift: shiftInfo.shift,
+    equipment: equipment || '',
+    hauler: haulerFull,
+    category: document.getElementById('category').value.trim(),
+    unitRunning: unitRunning,
+    unitNoRunning: unitNoRunning,
+    keterangan: document.getElementById('keterangan').value.trim(),
+    lat: lokasiTerakhir.lat,
+    lon: lokasiTerakhir.lon,
+    locationArea: window.getAreaName ? window.getAreaName(lokasiTerakhir.lat, lokasiTerakhir.lon) : '-',
+    unitLat: window.unitLat,
+    unitLon: window.unitLon,
+    unitLocationArea: window.getAreaName && window.unitLat != null && window.unitLon != null ? window.getAreaName(window.unitLat, window.unitLon) : '-',
+    photo: photoName || null
+  };
+}
+
+function valid(d){
+  if(!d.hauler)return'Hauler wajib diisi';
+  return'';
+}
+
+function resetForm(){
+  document.getElementById('haulerPrefix').value = '';
+  document.getElementById('haulerNo').value = '';
+  document.getElementById('haulerNo').focus();
+  clearPhoto();
+}
+
+let MASTER_UNITS = {};
+fetch('Master_Unit.json')
+  .then(res => res.json())
+  .then(data => {
+    MASTER_UNITS = data;
+  })
+  .catch(err => console.error("Gagal load Master_Unit.json:", err));
+
+function updateHaulerOutput() {
+  const prefixEl = document.getElementById('haulerPrefix');
+  const codeEl = document.getElementById('haulerNo');
+  const suggestBox = document.getElementById('unitSuggest');
+  const output = document.getElementById('haulerOutput');
+
+  const haulerCode = codeEl.value.trim();
+
+  suggestBox.innerHTML = '';
+  suggestBox.style.display = 'none';
+  output.textContent = '–';
+
+  if (!haulerCode || haulerCode.length < 3) {
+    prefixEl.value = '';
+    return;
+  }
+
+  let results = [];
+  Object.values(MASTER_UNITS).forEach(list => {
+    list.forEach(unit => {
+      if (unit.endsWith(`-${haulerCode.padStart(3,'0')}`)) {
+        results.push(unit);
+      }
+    });
+  });
+
+  if (!results.length) {
+    prefixEl.value = '';
+    return;
+  }
+
+  suggestBox.style.display = 'block';
+  results.slice(0,6).forEach(unit => {
+    const div = document.createElement('div');
+    div.textContent = unit;
+    div.style.padding = '6px 10px';
+    div.style.cursor = 'pointer';
+    div.onclick = () => {
+      const parts = unit.split('-');
+      prefixEl.value = parts[0];
+      codeEl.value = haulerCode;
+      output.textContent = unit;
+      suggestBox.style.display = 'none';
+    };
+    div.onmouseover = () => div.style.background = '#1e293b';
+    div.onmouseout = () => div.style.background = 'transparent';
+    suggestBox.appendChild(div);
+  });
+}
+
+function showPopup(msg,type='success'){
+  const modal=document.getElementById('popupModal');
+  const icon=document.getElementById('popupIcon');
+  const msgEl=document.getElementById('popupMsg');
+  msgEl.textContent=msg;
+  if(type==='success'){icon.textContent='✅';icon.className='icon success';}
+  else{icon.textContent='❌';icon.className='icon error';}
+  modal.style.display='block';
+}
+
+function closePopup(){
+  const modal=document.getElementById('popupModal');
+  const icon=document.getElementById('popupIcon');
+  icon.textContent='✅';
+  icon.className='icon success';
+  document.getElementById('popupMsg').textContent='';
+  modal.style.display='none';
+}
+
+function showPhotoFull(src){
+  const modal=document.getElementById('popupModal');
+  const icon=document.getElementById('popupIcon');
+  const msgEl=document.getElementById('popupMsg');
+  icon.innerHTML='<img src="'+src+'" style="max-width:90vw;max-height:70vh;border-radius:8px;">';
+  icon.className='icon';
+  msgEl.textContent='';
+  modal.style.display='block';
+}
+
+let confirmCallback=null;
+function showConfirm(msg,cb){
+  confirmCallback=cb;
+  document.getElementById('confirmMsg').textContent=msg;
+  document.getElementById('popupConfirm').classList.add('active');
+}
+
+function closeConfirm(){
+  document.getElementById('popupConfirm').classList.remove('active');
+  setTimeout(()=>{confirmCallback=null;},200);
+}
+
+document.getElementById('confirmYes').onclick=()=>{if(confirmCallback)confirmCallback(true);closeConfirm();}
+document.getElementById('confirmNo').onclick=()=>{if(confirmCallback)confirmCallback(false);closeConfirm();}
+
+function getShiftAndTanggalKerja() {
+  const now = new Date();
+  const jam = now.getHours();
+  const tanggalKerja = new Date(now);
+
+  let shift;
+  if (jam >= 6 && jam < 18) {
+    shift = 1;
+  } else {
+    shift = 2;
+    if (jam >= 0 && jam < 6) {
+      tanggalKerja.setDate(tanggalKerja.getDate() - 1);
+    }
+  }
+
+  const yyyy = tanggalKerja.getFullYear();
+  const mm = String(tanggalKerja.getMonth() + 1).padStart(2, '0');
+  const dd = String(tanggalKerja.getDate()).padStart(2, '0');
+
+  return {
+    shift,
+    tanggal: `${yyyy}-${mm}-${dd}`
+  };
+}
+
+async function simpan(){
+  const d=await getForm();const err=valid(d);
+  if(err){showPopup(err,'error');return;}
+  
+  if (photoData && photoName) {
+    await db.photos_v1.put({name: photoName, blob: photoData});
+    d.photo = photoName;
+  } else {
+    d.photo = null;
+  }
+  
+  await db.produksi_data_v2.add(d);
+  resetForm();
+  await render();
+  showPopup('Data tersimpan!','success');
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='SELECT')){
+    e.preventDefault();simpan();
+  }
+});
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;"}[c]));
+}
+
+async function render(){
+  if (window.photoObjectUrls) {
+    window.photoObjectUrls.forEach(url => URL.revokeObjectURL(url));
+  }
+  window.photoObjectUrls = [];
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  const arr = await load();
+  const fs = document.getElementById('filterShift').value;
+  const fd = document.getElementById('filterDate').value;
+
+  let data = arr;
+  if(fs) data = data.filter(x => String(x.shift) === String(fs));
+  if(fd) data = data.filter(x => x.tanggal === fd);
+
+  document.getElementById('totalInfo').textContent = `${data.length} data`;
+
+  let page = typeof window.currentPage === 'undefined' ? 0 : window.currentPage;
+  const perPage = 10;
+
+  if(page * perPage >= data.length){
+    page = 0;
+    window.currentPage = 0;
+  }
+
+  const start = page * perPage;
+  const end = start + perPage;
+  const batch = data.slice(start,end);
+
+  const photoUrls = {};
+  const photoPromises = batch.map(r => {
+    if (r.photo) {
+      return loadPhotoBlob(r.photo).then(blob => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          window.photoObjectUrls.push(url);
+          photoUrls[r.photo] = url;
+        }
+      });
+    }
+    return Promise.resolve();
+  });
+  await Promise.all(photoPromises);
+
+  batch.forEach((r,i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${start + i + 1}</td>
+      <td>${escapeHtml(r.tanggal)}</td>
+      <td>${escapeHtml(r.jam)}</td>
+      <td>Shift ${escapeHtml(r.shift)}</td>
+      <td>${escapeHtml(r.equipment)}</td>
+      <td>${escapeHtml(r.hauler)}</td>
+      <td>${escapeHtml(r.category)}</td>
+      <td>${escapeHtml(r.unitRunning || '-')}</td>
+      <td>${escapeHtml(r.unitNoRunning || '-')}</td>
+      <td>${escapeHtml(r.keterangan || '-')}</td>
+      <td>${escapeHtml(r.locationArea || '-')}</td>
+      <td>${r.lat ? r.lat.toFixed(6) : '-'}</td>
+      <td>${r.lon ? r.lon.toFixed(6) : '-'}</td>
+      <td>${escapeHtml(r.unitLocationArea || '-')}</td>
+      <td>${r.unitLat ? r.unitLat.toFixed(6) : '-'}</td>
+      <td>${r.unitLon ? r.unitLon.toFixed(6) : '-'}</td>
+      <td>${r.photo ? `<button class="btn secondary" onclick="showPhotoFull('${photoUrls[r.photo]}')">Lihat</button>` : '-'}</td>
+      <td><button class="btn danger" onclick="hapusSatu(${r.id})">Hapus</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function hapusSatu(id) {
+  showConfirm('Hapus data ini?', async yes => {
+    if(yes) {
+      const item = await db.produksi_data_v2.get(id);
+      if(item && item.photo) {
+        await db.photos_v1.delete(item.photo);
+      }
+      await deleteRecord(id);
+      render();
+    }
+  });
+}
+
+async function hapusSemua() {
+  showConfirm('Hapus semua data & foto?', async yes => {
+    if(yes) {
+      await clearAllData();
+      await db.photos_v1.clear();
+      render();
+    }
+  });
+}
+
+function clearFilter() {
+  document.getElementById('filterShift').value = '';
+  document.getElementById('filterDate').value = '';
+  render();
+}
+
+async function setEquipmentId(val) {
+  await setEquipmentSetting(val);
+  document.getElementById('equipmentNow').textContent = val || 'Belum dipilih';
+}
+
+window.onload = async () => {
+  await migrateFromLocalStorage();
+  const eq = await getEquipmentId();
+  if(eq) {
+    document.getElementById('equipmentId').value = eq;
+    document.getElementById('equipmentNow').textContent = eq;
+  }
+  render();
+};
+</script>
+</body>
+</html>
