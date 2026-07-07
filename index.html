@@ -1007,14 +1007,62 @@ async function loadPhotoBlob(name){
   return photo ? photo.blob : null;
 }
 
+async function compressPhoto(file, maxDim = 1280, quality = 0.7) {
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  return new Promise((resolve, reject) => {
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round(height * maxDim / width);
+          width = maxDim;
+        } else {
+          width = Math.round(width * maxDim / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        blob => {
+          URL.revokeObjectURL(url);
+          if (blob) {
+            const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
+            resolve(compressed);
+          } else {
+            reject(new Error('Gagal kompres foto'));
+          }
+        },
+        'image/webp',
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Gagal load foto untuk kompresi'));
+    };
+    img.src = url;
+  });
+}
+
 async function handlePhoto(file) {
   if (!file || !file.type.startsWith('image/')) {
     showPopup('File bukan gambar', 'error');
     return;
   }
-  photoData = file;
+  try {
+    const compressed = await compressPhoto(file, 1280, 0.7);
+    photoData = compressed;
+  } catch (e) {
+    console.error('Kompresi gagal, pakai file asli', e);
+    photoData = file;
+  }
   photoName = await generatePhotoName();
-  const url = URL.createObjectURL(file);
+  const url = URL.createObjectURL(photoData);
   if (window.previewObjectUrl) URL.revokeObjectURL(window.previewObjectUrl);
   window.previewObjectUrl = url;
   document.getElementById('photoImg').src = url;
@@ -1025,13 +1073,20 @@ async function handlePhoto(file) {
 }
 
 async function generatePhotoName() {
-  const haulerNo = document.getElementById('haulerNo').value.trim() || 'unit';
-  const haulerPrefix = document.getElementById('haulerPrefix').value.trim() || '';
-  
-  let haulerFull = haulerPrefix ? `${haulerPrefix}-${haulerNo.padStart(3,'0')}` : haulerNo;
-  if (haulerPrefix && MASTER_UNITS[haulerPrefix]) {
-    const found = MASTER_UNITS[haulerPrefix].find(item => item.endsWith(`-${haulerNo.padStart(3,'0')}`));
-    if (found) haulerFull = found;
+  const outputEl = document.getElementById('haulerOutput');
+  const selectedUnit = (outputEl && outputEl.textContent || '').trim();
+
+  let haulerFull = 'unit';
+  if (selectedUnit && selectedUnit !== '–') {
+    haulerFull = selectedUnit;
+  } else {
+    const haulerNo = document.getElementById('haulerNo').value.trim();
+    const haulerPrefix = document.getElementById('haulerPrefix').value.trim();
+    if (haulerPrefix) {
+      haulerFull = haulerNo ? `${haulerPrefix}-${haulerNo.padStart(3,'0')}` : haulerPrefix;
+    } else if (haulerNo) {
+      haulerFull = haulerNo;
+    }
   }
   
   const shiftInfo = getShiftAndTanggalKerja();
