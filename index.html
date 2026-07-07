@@ -6,10 +6,14 @@
 <title>Form Daily Input Equipment</title>
 <meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="manifest.json" />
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<!-- Font elegan untuk nama perusahaan -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ==== CSS ==== */
+/* ==== CSS (dimodifikasi: semua style loader dihapus) ==== */
 :root{
   --bg:#0f172a;
   --card:rgba(17,24,39,0.7);
@@ -26,19 +30,11 @@
 html,body{height:100%}
 body{
   margin:0;
-  background-color: #0f172a;
-  background: url('Generated_Image.png') no-repeat center center fixed;
-  background-size: 110%;
-  background-position: center top;
-  background-attachment: fixed;
-  color: #f9fafb;
+  background:linear-gradient(160deg,#0b1020,#0f172a 60%,#111827);
+  color:var(--text);
   font:16px/1.5 "Inter",system-ui,Segoe UI,Roboto,Arial;
 }
-.container{
-  max-width: 1100px;
-  margin: 150px auto 24px auto;
-  padding: 16px;
-}
+.container{max-width:1100px;margin:24px auto;padding:16px}
 .grid{display:grid;gap:16px}
 .card{
   background:var(--card);
@@ -83,22 +79,12 @@ input:focus,select:focus{
 .btn.warn:hover{background:#d97706}
 .btn.danger{background:var(--danger)}
 .btn.danger:hover{background:#dc2626}
-
-/* Container Tabel Responsif Modifikasi */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-top: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-}
-.table{width:100%;border-collapse:separate;border-spacing:0;}
+.table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto}
 .table th,.table td{
-  padding:12px 10px;border-bottom:1px solid var(--border);
+  padding:10px 8px;border-bottom:1px solid var(--border);
   text-align:left;font-size:14px
 }
-.table th{color:var(--muted);font-weight:600;background:#0f172a}
+.table th{color:var(--muted);font-weight:600}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px}
 .badge.s1{background:#0b3b1d;color:#86efac;border:1px solid #14532d}
 .badge.s2{background:#132a46;color:#93c5fd;border:1px solid #1e3a8a}
@@ -106,27 +92,15 @@ input:focus,select:focus{
 .right{display:flex;justify-content:flex-end}
 .nowrap{white-space:nowrap}
 .footer{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
-
 .chip{
-  display: inline-block;
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  background: #0f172a;
-  color: #fff;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-  word-break: break-word;
-  white-space: normal;
-  border:1px solid var(--border);
-}
-.chip:focus {
-  outline: none;
-  transform: scale(1);
+  background:#0b1222;border:1px solid var(--border);
+  padding:6px 12px;border-radius:999px;font-size:13px
 }
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-
+@media (max-width:800px){
+  .row{grid-template-columns:1fr}
+  .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1}
+}
 .action-bar {
   margin-top: 32px;
   display: flex;
@@ -135,9 +109,29 @@ input:focus,select:focus{
   padding-top: 20px;
   border-top: 1px dashed var(--border);
 }
+body {
+  height: 100%;
+  background-color: #0f172a; /* warna gelap cadangan */
+  background: url('Generated_Image.png') no-repeat center center fixed;
+  background-size: 110%; /* biar gak terlalu zoom */
+  background-position: center top;
+  background-attachment: fixed;
+  color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
+/* Pastikan elemen pembungkus utama ikut gelap */
 main, .container, .content, #app {
   background: transparent;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+    background-position: center center;
+  }
 }
 
 body::before {
@@ -147,10 +141,11 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.45); /* lapisan gelap transparan */
   z-index: -1;
 }
 
+/* Overlay biar gradasi bawah gelap */
 body::after {
   content: "";
   position: fixed;
@@ -163,6 +158,8 @@ body::after {
   z-index: -1;
 }
 
+
+/* Elemen info biar tetap elegan di atas background */
 #lokasiInfo {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -176,8 +173,8 @@ body::after {
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
   font-size: 13px;
   transition: all 0.3s ease;
-  z-index: 10;
 }
+
 #lokasiInfo:hover {
   transform: translateY(-2px);
   opacity: 1;
@@ -189,12 +186,37 @@ body::after {
   transform-origin: left center;
 }
 
-/* ==== LOGO & NAMA PERUSAHAAN ==== */
-@font-face {
-  font-family: 'Ovidius Script';
-  src: url('OvidiusScript.ttf') format('truetype');
-  font-display: swap;
+/* --- Cegah auto zoom di input saat diklik di HP --- */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* batas aman biar HP gak zoom */
+  }
 }
+
+/* Biar hasil output unit gak seperti balon di HP */
+.chip {
+  display: inline-block;
+  font-size: 14px;           /* kecilin tulisan */
+  padding: 6px 10px;         /* kurangi ruang dalam */
+  border-radius: 4px;
+  background: #0f172a;       /* sama kayak tema gelap */
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;    /* biar gak keluar layar */
+  white-space: normal;
+}
+
+/* biar gak membesar pas diklik di HP */
+.chip:focus {
+  outline: none;
+  transform: scale(1);
+}
+
+/* ==== LOGO & NAMA PERUSAHAAN ==== */
 
 #headerLogo {
   position: sticky;
@@ -213,24 +235,56 @@ body::after {
   box-shadow: 0 3px 8px rgba(0,0,0,0.35);
 }
 
+/* Logo agak lebih besar dan kontras */
 #logoPerusahaan {
   height: 90px;
   width: auto;
   border-radius: 10px;
   background: #fff;
   padding: 6px;
-  box-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 18px rgba(0,0,0,0.35);
+  box-shadow: 0 0 12px rgba(255,255,255,0.2),
+              0 0 18px rgba(0,0,0,0.35);
   transition: all 0.3s ease;
 }
 
+/* Nama perusahaan tampil elegan & mewah */
 #namaPerusahaan {
-  font-family: 'Ovidius Script', cursive;
-  font-size: 36px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
   font-weight: 500;
   letter-spacing: 1.2px;
   color: #f8f8f8;
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px rgba(200, 200, 255, 0.25);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.4),
+               0 0 10px rgba(200, 200, 255, 0.25);
   transition: all 0.3s ease;
+}
+
+/* Tambahkan ruang agar konten gak ketiban */
+.container {
+  max-width: 1100px;
+  margin: 150px auto 24px auto;
+  padding: 16px;
+}
+
+/* ==== Responsif ==== */
+@media (max-width: 768px) {
+  #headerLogo {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  #logoPerusahaan { height: 70px; }
+  #namaPerusahaan { font-size: 26px; }
+  .container { margin-top: 110px; }
+}
+
+@media (max-width: 480px) {
+  #headerLogo {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  #logoPerusahaan { height: 55px; }
+  #namaPerusahaan { font-size: 20px; }
+  .container { margin-top: 95px; }
 }
 
 /* ==== MODAL POPUP ==== */
@@ -239,7 +293,7 @@ body::after {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  min-width: 280px;
+  min-width: 250px;
   max-width: 90%;
   background: var(--card);
   border: 1px solid var(--border);
@@ -263,7 +317,7 @@ body::after {
   background: #1e293b;
   color: var(--text);
   border: none;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 8px;
   font-weight: 600;
   transition: all .2s ease;
@@ -291,12 +345,12 @@ body::after {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-  min-width: 280px;
+  min-width: 250px;
   max-width: 90%;
   box-shadow: 0 8px 25px rgba(0,0,0,0.5);
 }
 #popupConfirm .content .actions {
-  margin-top: 14px;
+  margin-top: 12px;
   display: flex;
   justify-content: center;
   gap: 10px;
@@ -317,236 +371,507 @@ body::after {
 .kmz-tooltip::before {
   display: none;
 }
+
 .leaflet-overlay-pane path {
   pointer-events: none !important;
 }
-
-/* ==== MEDIA QUERIES RESPONSIVE PENUH ==== */
-@media (max-width: 800px) {
-  .row { grid-template-columns: 1fr; gap: 10px; }
-  .col-3, .col-4, .col-6, .col-8, .col-12 { grid-column: span 1; }
-  .actions { width: 100%; }
-  .actions .btn { flex: 1; text-align: center; justify-content: center; }
+</style>
+<style id="redesign">
+/* ============================================================
+   REDESIGN ENTERPRISE — Android Material inspired
+   (override murni, tidak mengubah fungsi/logika apapun)
+   ============================================================ */
+:root{
+  --bg:#0b1220;
+  --card:#111827;
+  --surface-2:#1e293b;
+  --surface-3:#334155;
+  --muted:#94a3b8;
+  --text:#e5e7eb;
+  --accent:#22c55e;
+  --accent-2:#38bdf8;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --border:rgba(148,163,184,.18);
+  --outline:rgba(148,163,184,.20);
+  --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.30);
+  --radius:16px;
+  --on-primary:#052e16;
 }
 
-@media (max-width: 768px) {
-  body {
-    background-attachment: scroll;
-    background-position: center center;
-  }
-  input, select, textarea, button {
-    font-size: 16px !important; /* Cegah Auto-Zoom di iOS/Android Safari & Chrome */
-  }
-  #headerLogo {
-    padding: 10px 16px;
-    gap: 10px;
-  }
-  #logoPerusahaan { height: 65px; }
-  #namaPerusahaan { font-size: 24px; }
-  .container { margin-top: 110px; padding: 12px; }
-  #lokasiInfo {
-    position: static;
-    margin: -10px auto 14px auto;
-    text-align: center;
-    width: calc(100% - 24px);
-    max-width: 100%;
-  }
-  .card { padding: 16px; border-radius: 16px; }
-  .right { justify-content: flex-start; margin-top: 8px; }
+/* ---------- BASE ---------- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:linear-gradient(165deg,#0a0f1e 0%,#0f172a 55%,#0b1220 100%);
+  color:var(--text);
+  font:15px/1.5 "Roboto","Inter",system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:.2px;
 }
 
-@media (max-width: 480px) {
-  #logoPerusahaan { height: 50px; }
-  #namaPerusahaan { font-size: 18px; }
-  .container { margin-top: 90px; }
-  h1 { font-size: 20px; }
-  h2 { font-size: 15px; }
+/* Background gambar + overlay tetap, lebih halus */
+body{
+  background-color:#0b1220;
+  background:url('Generated_Image.png') no-repeat center center fixed;
+  background-size:cover;
+  background-position:center;
+  color:var(--text);
+  font-family:'Roboto','Inter',sans-serif;
+  margin:0;padding:0;
+}
+body::before{
+  content:"";position:fixed;inset:0;
+  background:rgba(8,12,22,.55);
+  z-index:-1;
+}
+body::after{
+  content:"";position:fixed;left:0;bottom:0;width:100%;height:220px;
+  background:linear-gradient(to bottom,rgba(11,18,32,0) 0%,rgba(11,18,32,1) 100%);
+  pointer-events:none;z-index:-1;
+}
+
+/* ---------- TOP APP BAR ---------- */
+#headerLogo{
+  position:fixed;top:0;left:0;width:100%;
+  height:64px;display:flex;align-items:center;justify-content:flex-start;
+  gap:12px;padding:0 16px;z-index:999;
+  background:rgba(11,18,32,.92);
+  border-bottom:1px solid var(--outline);
+  backdrop-filter:blur(14px);
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+#logoPerusahaan{
+  height:42px;width:auto;border-radius:10px;background:#fff;padding:4px;
+  box-shadow:0 0 10px rgba(255,255,255,.18),0 0 16px rgba(0,0,0,.3);
+}
+#namaPerusahaan{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:700;letter-spacing:.5px;color:#f8fafb;
+  text-shadow:0 1px 2px rgba(0,0,0,.45);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ---------- CONTAINER ---------- */
+.container{
+  max-width:960px;margin:88px auto 36px;padding:0 16px;
+}
+
+/* ---------- CARD ---------- */
+.card{
+  background:var(--card);
+  border:1px solid var(--outline);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+  transition:box-shadow .25s ease;
+  margin-bottom:20px;
+}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,.5),0 14px 34px rgba(0,0,0,.38);}
+
+h1{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:.3px;}
+h2{
+  font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--muted);margin:0 0 18px;
+}
+
+/* ---------- FORM GRID ---------- */
+.row{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:0;}
+.col-3{grid-column:span 3}
+.col-4{grid-column:span 4}
+.col-6{grid-column:span 6}
+.col-8{grid-column:span 8}
+.col-12{grid-column:span 12}
+
+label{
+  font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:8px;
+}
+
+/* ---------- INPUTS (Material outlined) ---------- */
+input,select,textarea{
+  width:100%;height:48px;padding:0 14px;
+  border-radius:12px;border:1px solid var(--outline);
+  background:#0b1222;color:var(--text);font-size:16px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+input::placeholder{color:#64748b;}
+input:focus,select:focus{
+  outline:none;border-color:var(--accent-2);
+  box-shadow:0 0 0 3px rgba(56,189,248,.22);
+}
+select{
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px;
+  padding-right:38px;
+}
+/* cegah zoom di mobile */
+@media (max-width:768px){input,select,textarea{font-size:16px !important;}}
+
+/* ---------- BUTTONS ---------- */
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  cursor:pointer;border:none;font-weight:600;font-size:14px;
+  height:44px;padding:0 18px;border-radius:12px;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  transition:background .15s ease,transform .08s ease,box-shadow .15s ease;
+  width:auto;
+}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:var(--on-primary);box-shadow:0 2px 10px rgba(34,197,94,.30);}
+.btn.primary:hover{background:#16a34a}
+.btn.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--outline);}
+.btn.secondary:hover{background:#243043}
+.btn.secondary:disabled{opacity:.4;cursor:not-allowed}
+.btn.warn{background:var(--warning);color:#1f1300;box-shadow:0 2px 10px rgba(245,158,11,.25);}
+.btn.warn:hover{background:#d97706}
+.btn.danger{background:var(--danger);color:#fff;box-shadow:0 2px 10px rgba(239,68,68,.25);}
+.btn.danger:hover{background:#dc2626}
+
+/* Shift toggle (segmented feel) */
+#btnShift1,#btnShift2{
+  flex:1;height:44px;border-radius:12px;
+}
+#btnShift1[style*="solid"],#btnShift2[style*="solid"]{
+  background:#4ade80;color:#052e16;border-color:transparent;
+  box-shadow:0 0 0 3px rgba(74,222,128,.30),0 2px 10px rgba(74,222,128,.35);
+  opacity:1;
+}
+#btnShift1[style*="solid"]:disabled,#btnShift2[style*="solid"]:disabled{
+  opacity:1;cursor:default;
+}
+
+/* ---------- CHIP ---------- */
+.chip{
+  display:inline-block;font-size:13px;padding:9px 12px;border-radius:10px;
+  background:var(--surface-2);color:var(--text);
+  border:1px solid var(--outline);width:100%;box-sizing:border-box;
+  word-break:break-word;white-space:normal;
+}
+.chip:focus{outline:none;transform:none}
+
+/* ---------- BADGES ---------- */
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+.badge.s1{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.4);}
+.badge.s2{background:rgba(56,189,248,.15);color:#93c5fd;border:1px solid rgba(56,189,248,.4);}
+
+/* ---------- TABLE ---------- */
+div[style*="overflow:auto"]{
+  border:1px solid var(--outline);border-radius:12px;max-height:480px;
+  background:var(--card);
+}
+.table{width:100%;border-collapse:collapse;overflow:hidden;}
+.table th,.table td{padding:12px 10px;border-bottom:1px solid var(--outline);text-align:left;font-size:13px;}
+.table th{
+  color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.4px;text-transform:uppercase;
+  position:sticky;top:0;background:var(--surface-2);z-index:1;
+}
+.table tbody tr:hover{background:rgba(148,163,184,.06);}
+.table tbody tr:last-child td{border-bottom:none;}
+.right{display:flex;justify-content:flex-end}
+.nowrap{white-space:nowrap}
+.muted{color:var(--muted)}
+
+/* ---------- MAP ---------- */
+#map{height:440px;border-radius:12px;border:1px solid var(--outline);margin-top:8px;z-index:0;}
+
+/* ---------- GPS STATUS PILL ---------- */
+#lokasiInfo{
+  position:fixed;top:76px;right:12px;
+  background:rgba(11,18,32,.85);border:1px solid var(--outline);color:var(--text);
+  border-radius:999px;padding:7px 14px;font-size:12px;z-index:998;
+  backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.3);
+  display:flex;align-items:center;gap:6px;
+}
+#lokasiInfo::before{
+  content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 0 4px rgba(34,197,94,.25);
+}
+
+/* ---------- PHOTO ---------- */
+#photoPreview img{border:1px solid var(--outline);}
+
+/* ---------- PAGINATION ---------- */
+#pageInfo{width:auto;min-width:96px;text-align:center;font-weight:600;}
+#btnPrevPage,#btnNextPage{min-width:120px;}
+
+/* ---------- POPUP MODAL (dialog) ---------- */
+#popupModal{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  min-width:280px;max-width:90%;background:var(--card);
+  border:1px solid var(--outline);border-radius:24px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);color:var(--text);
+  padding:24px;display:none;z-index:9999;text-align:center;
+}
+#popupModal .icon{font-size:36px;margin-bottom:12px;}
+#popupModal .icon.success{color:var(--accent)}
+#popupModal .icon.error{color:var(--danger)}
+#popupModal .msg{font-size:15px;margin-bottom:16px;line-height:1.4;}
+#popupModal .closeBtn{
+  cursor:pointer;background:var(--surface-2);color:var(--text);
+  border:1px solid var(--outline);padding:9px 18px;border-radius:10px;font-weight:600;
+}
+#popupModal .closeBtn:hover{background:#243043}
+
+/* ---------- CONFIRM DIALOG ---------- */
+#popupConfirm .content{
+  background:var(--card);border:1px solid var(--outline);border-radius:24px;
+  padding:24px;text-align:center;min-width:280px;max-width:90%;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+#popupConfirm .content .actions{margin-top:16px;justify-content:center;}
+
+/* ---------- KMZ TOOLTIP ---------- */
+.kmz-tooltip{
+  background:rgba(239,68,68,.9);color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);text-shadow:0 1px 2px rgba(0,0,0,.4);
+}
+.kmz-tooltip::before{display:none;}
+.leaflet-overlay-pane path{pointer-events:none !important;}
+
+/* ---------- SCROLLBAR ---------- */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:768px){
+  #headerLogo{height:56px;padding:0 12px;gap:10px;}
+  #logoPerusahaan{height:36px;}
+  #namaPerusahaan{font-size:14px;}
+  .container{margin-top:72px;max-width:100%;padding:0 12px;}
+  .row{grid-template-columns:1fr;}
+  .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1;}
+  .card{padding:18px;}
+  #lokasiInfo{top:64px;font-size:11px;padding:6px 10px;}
+  #map{height:360px;}
+}
+@media (max-width:480px){
+  #namaPerusahaan{font-size:16px;}
+  .card{padding:16px;}
+  .btn{font-size:13px;padding:0 14px;}
+  #btnPrevPage,#btnNextPage{min-width:0;flex:1;}
 }
 </style>
 </head>
 <body>
 
+<!-- 🏢 Logo & Nama Perusahaan -->
 <div id="headerLogo">
   <img src="logo-harita-group.jpg" alt="Logo Harita Group" id="logoPerusahaan">
-  <span id="namaPerusahaan"><span style="letter-spacing:3px;">&nbsp;</span> MCR AJA</span>
+  <span id="namaPerusahaan">EQUIPMENT MONITORING ENTERPRISE</span>
 </div>
 
 <div id="lokasiInfo">GPS: mencari...</div>
-
 <div class="container grid">
-  <div class="card">
-    <h1>Form Daily Input Equipment</h1>
-    <h2>Waktu & lokasi tercatat otomatis</h2>
-    
-    <div class="row">
-      <div class="col-4">
-        <label>Shift</label>
-        <div class="actions">
-          <button class="btn secondary" id="btnShift1" onclick="setShift(1)">Shift 1</button>
-          <button class="btn secondary" id="btnShift2" onclick="setShift(2)">Shift 2</button>
-        </div>
-      </div>
-      <div class="col-4">
-        <label>Tanggal (otomatis)</label>
-        <input id="tanggalNow" type="text" disabled />
-      </div>
-      <div class="col-4">
-        <label>Jam (otomatis)</label>
-        <input id="jamNow" type="text" disabled />
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:8px">
-      <div class="col-4">
-        <label>ID Equipment</label>
-        <select id="equipmentId" onchange="setEquipmentId(this.value)">
-          <option value="">-- Pilih ID --</option>
-          <option value="ABIEL">ABIEL</option>
-          <option value="ASDAR">ASDAR</option>
-          <option value="ARIF">ARIF</option>
-          <option value="JAKARIA">JAKARIA</option>
-          <option value="RIDHO">RIDHO</option>
-          <option value="WAHYUDI">WAHYUDI</option>
-          <option value="E07">E07</option>
-          <option value="E08">E08</option>
-          <option value="E09">E09</option>
-          <option value="E10">E10</option>
-        </select>
-        <div class="chip" id="equipmentNow" style="margin-top: 6px;">Belum dipilih</div>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:8px">
-      <div class="col-4">
-        <label>Unit</label>
-        <div style="display:flex;gap:6px">
-          <select id="haulerPrefix" style="width:100px" onchange="updateHaulerOutput()">
-            <option value="">--</option>
-            <option value="AHG">AHG</option>
-            <option value="AKs">AKs</option>
-            <option value="BKM">BKM</option>
-            <option value="BSS">BSS</option>
-            <option value="HER">HER</option>
-            <option value="KTU">KTU</option>
-            <option value="LMP">LMP</option>
-            <option value="PIK">PIK</option>
-            <option value="WWP">WWP</option>
-          </select>
-          <input id="haulerNo" placeholder="100" style="flex:1; padding:6px 8px; border-radius:6px; box-sizing:border-box;" oninput="updateHaulerOutput()" />
-        </div>
-        <div id="unitSuggest" style="background:#0b1222; border:1px solid var(--border); border-radius:8px; margin-top:4px; display:none; max-height:120px; overflow:auto;"></div>
-        <div class="chip" id="haulerOutput" style="margin-top:6px;">–</div>
-      </div>
-      <div class="col-4">
-        <label>Category</label>
-        <select id="category">
-          <option value="">-- Pilih Category --</option>
-          <option value="Working">Working</option>
-          <option value="Breakdown">Breakdown</option>
-          <option value="No Operator">No Operator</option>
-          <option value="No Job">No Job</option>
-        </select>
-      </div>
-      <div class="col-4">
-        <label>Keterangan</label>
-        <input id="keterangan" placeholder="Isi keterangan tambahan...">
-      </div>
-      
-      <div class="col-12">
-        <label>Boundary Area (KMZ)</label>
-        <div class="actions">
-          <button class="btn secondary" onclick="document.getElementById('kmzInput').click()">Upload KMZ Boundary</button>
-          <input type="file" id="kmzInput" accept=".kmz" style="display:none" onchange="if(this.files[0]) loadKmz(this.files[0])">
-          <button class="btn secondary" id="btnClearKmz" onclick="clearKmz()" style="display:none;">Hapus Boundary</button>
-        </div>
-      </div>
-
-      <div class="col-12" style="margin-top:12px;">
-        <label>Pilih Titik Lokasi (klik peta)</label>
-        <div id="map" style="height:400px; max-height: 70vh; border-radius:12px; margin-top:6px; z-index: 1;"></div>
-        <div class="chip" id="areaName" style="margin-top:6px;">User Location: -</div>
-        <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
-      </div>
-
-      <div class="col-12" style="margin-top:12px;">
-        <label>Foto Unit (opsional)</label>
-        <div class="actions">
-          <button class="btn secondary" onclick="document.getElementById('photoInput').click()">Ambil Foto</button>
-          <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this.files[0])">
-          <button class="btn secondary" id="btnClearPhoto" onclick="clearPhoto()" style="display:none;">Hapus Foto</button>
-        </div>
-        <div id="photoPreview" style="margin-top:8px;display:none; text-align: center;">
-          <img id="photoImg" style="max-width:100%; max-height:200px; border-radius:8px; object-fit: contain;">
-        </div>
-        <div class="chip" id="photoStatus" style="margin-top:4px;display:none;">Foto siap disimpan</div>
-      </div>
-
-      <div class="col-12" style="margin-top:16px;">
-         <button class="btn primary" style="width:100%; padding: 12px;" onclick="simpan()">Simpan Data</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="row" style="align-items:end">
-      <div class="col-8">
-        <h2>Data Tersimpan</h2>
-        <div class="filters">
-          <select id="filterShift" onchange="render()" style="max-width: 150px;">
-            <option value="">Semua Shift</option>
-            <option value="1">Shift 1</option>
-            <option value="2">Shift 2</option>
-          </select>
-          <input type="date" id="filterDate" onchange="render()" style="max-width: 170px;" />
-          <button class="btn secondary" onclick="clearFilter()">Reset</button>
-        </div>
-      </div>
-      <div class="col-4 right">
-        <div class="chip" id="totalInfo" style="max-width: 120px;">0 data</div>
-      </div>
-    </div>
-    
-    <div class="table-responsive">
-      <table class="table" id="tbl">
-        <thead>
-          <tr>
-             <th class="nowrap">#</th>
-             <th class="nowrap">Tanggal</th>
-             <th class="nowrap">Shift</th>
-             <th class="nowrap">Equipment ID</th>
-             <th class="nowrap">Unit</th>
-             <th class="nowrap">Category</th>
-             <th class="nowrap">Unit Running</th>
-             <th class="nowrap">Unit No Running</th>
-             <th>Keterangan</th>
-             <th>User Location</th>
-             <th class="nowrap">User Latitude</th>
-             <th class="nowrap">User Longitude</th>
-             <th>Unit Location</th>
-             <th class="nowrap">Unit Latitude</th>
-             <th class="nowrap">Unit Longitude</th>
-             <th>Foto</th>
-             <th class="nowrap">Aksi</th>
-           </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-    
-    <div style="margin-top:24px" class="actions">
-      <button class="btn danger" onclick="hapusSemua()">Hapus Semua</button>
-      <button class="btn warn" onclick="exportCSVFiltered()" style="margin-left:auto;">Export to ZIP</button>
-    </div>
-    <div class="footer">Data disimpan di browser (IndexedDB). Bisa dipakai offline.</div>
-  </div>
+<!-- FORM INPUT -->
+<div class="card">
+<h1>Form Daily Input Equipment</h1>
+<h2>Waktu & lokasi tercatat otomatis</h2>
+<div class="row">
+<div class="col-4">
+<label>Shift</label>
+<div class="actions">
+<button class="btn secondary" id="btnShift1" onclick="setShift(1)">Shift 1</button>
+<button class="btn secondary" id="btnShift2" onclick="setShift(2)">Shift 2</button>
+</div>
+</div>
+<div class="col-4">
+<label>Tanggal (otomatis)</label>
+<input id="tanggalNow" type="text" disabled />
+</div>
+<div class="col-4">
+<label>Jam (otomatis)</label>
+<input id="jamNow" type="text" disabled />
+</div>
 </div>
 
+<!-- === TAMBAHAN TIM EQUIPMENT: pilih sekali, tersimpan === -->
+<div class="row" style="margin-top:8px">
+  <div class="col-4">
+    <label>ID Equipment</label>
+    <select id="equipmentId" onchange="setEquipmentId(this.value)">
+      <option value="">-- Pilih ID --</option>
+      <option value="ABIEL">ABIEL</option>
+      <option value="ASDAR">ASDAR</option>
+      <option value="ARIF">ARIF</option>
+      <option value="JAKARIA">JAKARIA</option>
+      <option value="RIDHO">RIDHO</option>
+      <option value="WAHYUDI">WAHYUDI</option>
+      <option value="E07">E07</option>
+      <option value="E08">E08</option>
+      <option value="E09">E09</option>
+      <option value="E10">E10</option>
+    </select>
+    <div class="chip" id="equipmentNow">Belum dipilih</div>
+  </div>
+</div>
+<!-- === /TAMBAHAN TIM EQUIPMENT === -->
+
+<div style="display:flex; gap:8px; margin-top:10px;">
+  <!-- area loader-related dihapus -->
+</div>
+
+<div class="row" style="margin-top:8px">
+  <!-- Loader inputs removed entirely -->
+
+  <div class="col-4">
+    <label>Unit</label>
+    <div style="display:flex;gap:6px">
+      <select id="haulerPrefix" style="width:100px" onchange="updateHaulerOutput()">
+        <option value="">--</option>
+        <option value="AHG">AHG</option>
+        <option value="AKs">AKs</option>
+        <option value="BKM">BKM</option>
+        <option value="BSS">BSS</option>
+        <option value="HER">HER</option>
+        <option value="KTU">KTU</option>
+        <option value="LMP">LMP</option>
+        <option value="PIK">PIK</option>
+        <option value="WWP">WWP</option>
+      </select>
+      <input id="haulerNo" placeholder="100"
+        style="flex:1; font-size:16px; padding:6px 8px; border-radius:6px; box-sizing:border-box;"
+        oninput="updateHaulerOutput()" />
+    </div>
+    <div id="unitSuggest" style="
+      background:#0b1222;
+      border:1px solid var(--border);
+      border-radius:8px;
+      margin-top:4px;
+      display:none;
+      max-height:120px;
+      overflow:auto;
+    "></div>
+    <div class="chip" id="haulerOutput" style="margin-top:6px;">–</div>
+  </div>
+  <div class="col-4">
+    <label>Category</label>
+    <select id="category">
+      <option value="">-- Pilih Category --</option>
+      <option value="Working">Working</option>
+      <option value="Breakdown">Breakdown</option>
+      <option value="No Operator">No Operator</option>
+      <option value="No Job">No Job</option>
+    </select>
+  </div>
+  <div class="col-4">
+      <label>Keterangan</label>
+      <input id="keterangan" placeholder="Isi keterangan tambahan...">
+    </div>
+<!-- Jumlah Bucket removed from form -->
+    <div class="col-12">
+      <label>Boundary Area (KMZ)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn secondary" onclick="document.getElementById('kmzInput').click()" style="width:auto;">
+          Upload KMZ Boundary
+        </button>
+        <input type="file" id="kmzInput" accept=".kmz" style="display:none" onchange="if(this.files[0]) loadKmz(this.files[0])">
+        <button class="btn secondary" id="btnClearKmz" onclick="clearKmz()" style="width:auto;display:none;">
+          Hapus Boundary
+        </button>
+      </div>
+    </div>
+
+    <div class="col-12" style="margin-top:16px;">
+      <label>Pilih Titik Lokasi (klik peta)</label>
+      <div id="map" style="height:500px;border-radius:12px;margin-top:6px;"></div>
+      <div class="chip" id="areaName" style="margin-top:6px;">User Location: -</div>
+      <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
+    </div>
+
+<div class="col-12" style="margin-top:12px;">
+      <label>Foto Unit (opsional)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn secondary" onclick="document.getElementById('photoInput').click()" style="width:auto;">
+          Ambil Foto
+        </button>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this.files[0])">
+        <button class="btn secondary" id="btnClearPhoto" onclick="clearPhoto()" style="width:auto;display:none;">
+          Hapus Foto
+        </button>
+      </div>
+      <div id="photoPreview" style="margin-top:8px;display:none;">
+        <img id="photoImg" style="max-width:100%;max-height:150px;border-radius:8px;">
+      </div>
+      <div class="chip" id="photoStatus" style="margin-top:4px;display:none;">Foto siap disimpan</div>
+    </div>
+
+    <div class="col-12" style="margin-top:16px;">
+       <button class="btn primary" style="width:100%;" onclick="simpan()">Simpan</button>
+     </div>
+   </div>
+
+<!-- DATA TERSIMPAN -->
+<div class="card" style="margin-top:24px;">
+<div class="row" style="align-items:end">
+<div class="col-8">
+<h2>Data Tersimpan</h2>
+<div class="filters">
+<select id="filterShift" onchange="render()">
+<option value="">Semua Shift</option>
+<option value="1">Shift 1</option>
+<option value="2">Shift 2</option>
+</select>
+<input type="date" id="filterDate" onchange="render()" />
+<button class="btn secondary" onclick="clearFilter()">Bersihkan Filter</button>
+</div>
+</div>
+<div class="col-4 right">
+<div class="chip" id="totalInfo">0 data</div>
+</div>
+</div>
+<div style="overflow:auto;margin-top:8px">
+<table class="table" id="tbl">
+<thead>
+<tr>
+   <th class="nowrap">#</th>
+   <th class="nowrap">Tanggal</th>
+   <th class="nowrap">Jam</th>
+   <th>Shift</th>
+   <th>Equipment ID</th>
+   <th>Unit</th>
+   <th>Category</th>
+   <th>Unit Running</th>
+   <th>Unit No Running</th>
+   <th>Keterangan</th>
+   <th>User Location</th>
+   <th class="nowrap">User Latitude</th>
+   <th class="nowrap">User Longitude</th>
+   <th>Unit Location</th>
+   <th class="nowrap">Unit Latitude</th>
+   <th class="nowrap">Unit Longitude</th>
+   <th>Foto</th>
+   <th class="nowrap">Aksi</th>
+ </tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+<div class="actions" style="justify-content:center;gap:12px;margin-top:14px;">
+  <button class="btn secondary" id="btnPrevPage" onclick="prevPage()">‹ Sebelumnya</button>
+  <div class="chip" id="pageInfo" style="width:auto;">Page 1 / 1</div>
+  <button class="btn secondary" id="btnNextPage" onclick="nextPage()">Berikutnya ›</button>
+</div>
+<div style="margin-top:10px" class="actions">
+  <button class="btn secondary" onclick="hapusSemua()">Hapus Semua</button>
+  <button class="btn warn" onclick="exportCSVFiltered()" style="margin-left:auto;">Export to ZIP</button>
+</div>
+<div class="footer">Data disimpan di browser (IndexedDB). Bisa dipakai offline.</div>
+</div>
+</div>
+
+<!-- POPUP MODAL -->
 <div id="popupModal">
   <div class="icon" id="popupIcon">✅</div>
   <div class="msg" id="popupMsg">Data tersimpan!</div>
   <button class="closeBtn" onclick="closePopup()">Tutup</button>
 </div>
 
+<!-- POPUP KONFIRMASI MODERN -->
 <div id="popupConfirm">
   <div class="content">
     <div class="msg" id="confirmMsg">Apakah yakin ingin menghapus data ini?</div>
@@ -559,6 +884,8 @@ body::after {
 
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.7/dist/dexie.min.js"></script>
 <script>
+// ==== SEMUA JS DI GABUNG DAN DIBENAHI URUTANNYA ====
+
 // ==== UTILITAS WAKTU ====
 const pad = n => String(n).padStart(2,'0');
 function getTanggal(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
@@ -749,6 +1076,7 @@ async function getForm() {
   }
 
   const haulerFull = findFullCode(haulerPrefix, haulerNo);
+
   const jamSekarang = getJam(now);
   const category = document.getElementById('category').value.trim();
 
@@ -758,6 +1086,7 @@ async function getForm() {
   if (category === 'Working') {
     unitRunning = jamSekarang;
   }
+
   if (category === 'Breakdown' || category === 'No Operator' || category === 'No Job') {
     unitNoRunning = jamSekarang;
   }
@@ -839,7 +1168,7 @@ function updateHaulerOutput() {
   results.slice(0,6).forEach(unit => {
     const div = document.createElement('div');
     div.textContent = unit;
-    div.style.padding = '8px 10px';
+    div.style.padding = '6px 10px';
     div.style.cursor = 'pointer';
     div.onclick = () => {
       const parts = unit.split('-');
@@ -878,7 +1207,7 @@ function showPhotoFull(src){
   const modal=document.getElementById('popupModal');
   const icon=document.getElementById('popupIcon');
   const msgEl=document.getElementById('popupMsg');
-  icon.innerHTML='<img src="'+src+'" style="max-width:90vw;max-height:70vh;border-radius:8px;object-fit:contain;">';
+  icon.innerHTML='<img src="'+src+'" style="max-width:90vw;max-height:70vh;border-radius:8px;">';
   icon.className='icon';
   msgEl.textContent='';
   modal.style.display='block';
@@ -906,10 +1235,13 @@ function getShiftAndTanggalKerja() {
 
   let shift;
   if (jam >= 6 && jam < 18) {
+    // Shift 1: 06.00–17.59, tanggal sama
     shift = 1;
   } else {
+    // Shift 2: 18.00–05.59
     shift = 2;
     if (jam >= 0 && jam < 6) {
+      // Jam 00:00–05:59 → tanggal kerja harus mundur 1 hari
       tanggalKerja.setDate(tanggalKerja.getDate() - 1);
     }
   }
@@ -918,7 +1250,10 @@ function getShiftAndTanggalKerja() {
   const mm = String(tanggalKerja.getMonth() + 1).padStart(2, '0');
   const dd = String(tanggalKerja.getDate()).padStart(2, '0');
 
-  return { shift, tanggal: `${yyyy}-${mm}-${dd}` };
+  return {
+    shift,
+    tanggal: `${yyyy}-${mm}-${dd}`
+  };
 }
 
 // ==== SIMPAN DATA ====
@@ -1009,15 +1344,16 @@ async function render(){
     }
 
     const tr = document.createElement('tr');
+
     const badge = `<span class="badge ${r.shift==1?'s1':'s2'}">${r.shift==1?'Shift 1':'Shift 2'}</span>`;
     const photoSrc = r.photo ? (photoUrls[r.photo] || null) : null;
 
     tr.innerHTML = `
        <td>${start+i+1}</td>
-       <td class="nowrap">${r.tanggal}</td>
+       <td>${r.tanggal}</td>
        <td>${badge}</td>
        <td>${escapeHtml(r.equipment||'')}</td>
-       <td class="nowrap">${escapeHtml(r.hauler)}</td>
+       <td>${escapeHtml(r.hauler)}</td>
        <td>${escapeHtml(r.category)}</td>
        <td>${r.unitRunning || '-'}</td>
        <td>${r.unitNoRunning || '-'}</td>
@@ -1031,8 +1367,28 @@ async function render(){
        <td>${photoSrc ? `<img src="${photoSrc}" style="max-width:60px;max-height:60px;border-radius:4px;cursor:pointer" onclick="showPhotoFull('${photoSrc.replace(/"/g, '&quot;')}')">` : (r.photo ? escapeHtml(r.photo) : '-')}</td>
        <td><button class="btn danger" onclick="hapusModern(${r.id},this)">Hapus</button></td>
      `;
+
     tbody.appendChild(tr);
   });
+
+  const totalPage = Math.ceil(data.length / perPage) || 1;
+  const pageInfo = document.getElementById('pageInfo');
+  if(pageInfo) pageInfo.textContent = `Page ${page + 1} / ${totalPage}`;
+
+  const btnPrev = document.getElementById('btnPrevPage');
+  const btnNext = document.getElementById('btnNextPage');
+  if(btnPrev) btnPrev.disabled = (page <= 0);
+  if(btnNext) btnNext.disabled = (page + 1 >= totalPage);
+}
+
+function prevPage(){
+  if(typeof window.currentPage === 'undefined') window.currentPage = 0;
+  if(window.currentPage > 0){ window.currentPage--; render(); }
+}
+
+function nextPage(){
+  if(typeof window.currentPage === 'undefined') window.currentPage = 0;
+  window.currentPage++; render();
 }
 
 async function clearFilter(){
@@ -1104,80 +1460,90 @@ async function exportCSVFiltered(){
   if(fd)data=data.filter(x=>x.tanggal===fd);
   if(!data.length){showPopup('Data sesuai filter kosong.','error');return;}
 
-  const wsData=data.map(r=>{
-    const hauler = r.hauler || '-';
-    return {
-      'Tanggal': r.tanggal||'',
-      'Jam': r.jam||'',
-      'Shift': r.shift||'',
-      'ID Equipment': r.equipment||'',
-      'Code Unit': hauler,
-      'Category': r.category||'',
-      'Unit Running': r.unitRunning||'-',
-      'Unit No Running': r.unitNoRunning||'-',
-      'Keterangan': r.keterangan||'',
-      'User Location': r.locationArea || '-',
-      'User Latitude': r.lat ? Number(r.lat.toFixed(5)) : '',
-      'User Longitude': r.lon ? Number(r.lon.toFixed(5)) : '',
-      'Unit Location': r.unitLocationArea || '-',
-      'Unit Latitude': r.unitLat ? Number(r.unitLat.toFixed(5)) : '',
-      'Unit Longitude': r.unitLon ? Number(r.unitLon.toFixed(5)) : '',
-      'Foto': r.photo ? r.photo : '-'
-    };
-  });
+const wsData=data.map(r=>{
+      const hauler = r.hauler || '-';
+      return {
+        'Tanggal': r.tanggal||'',
+        'Jam': r.jam||'',
+        'Shift': r.shift||'',
+        'ID Equipment': r.equipment||'',
+        'Code Unit': hauler,
+        'Category': r.category||'',
+        'Unit Running': r.unitRunning||'-',
+        'Unit No Running': r.unitNoRunning||'-',
+        'Keterangan': r.keterangan||'',
+        'User Location': r.locationArea || '-',
+        'User Latitude': r.lat ? Number(r.lat.toFixed(5)) : '',
+        'User Longitude': r.lon ? Number(r.lon.toFixed(5)) : '',
+        'Unit Location': r.unitLocationArea || '-',
+        'Unit Latitude': r.unitLat ? Number(r.unitLat.toFixed(5)) : '',
+        'Unit Longitude': r.unitLon ? Number(r.unitLon.toFixed(5)) : '',
+        'Foto': r.photo ? r.photo : '-'
+      };
+    });
 
-  const ws=XLSX.utils.json_to_sheet(wsData);
-  ws['!cols'] = Object.keys(wsData[0] || {}).map(k => ({
-    wch: Math.max(k.length, ...wsData.map(r => String(r[k] ?? '').length)) + 4
-  }));
+const ws=XLSX.utils.json_to_sheet(wsData);
+    ws['!cols'] = Object.keys(wsData[0] || {}).map(k => ({
+      wch: Math.max(
+        k.length,
+        ...wsData.map(r => String(r[k] ?? '').length)
+      ) + 4
+    }));
 
-  const now = new Date();
-  const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
-  const equip = (await getEquipmentId()).replace(/[^a-zA-Z0-9_-]/g, '');
-  const shiftFilter = document.getElementById('filterShift').value;
-  const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
+    const now = new Date();
+    const dateName = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+    const equip = (await getEquipmentId()).replace(/[^a-zA-Z0-9_-]/g, '');
+    const shiftFilter = document.getElementById('filterShift').value;
+    const shiftName = shiftFilter ? `S${shiftFilter}` : 'ALL';
 
-  const filteredPhotoNames = new Set();
-  data.forEach(r => { if (r.photo) filteredPhotoNames.add(r.photo); });
+    const filteredPhotoNames = new Set();
+    data.forEach(r => {
+      if (r.photo) {
+        filteredPhotoNames.add(r.photo);
+      }
+    });
 
-  const existingPhotoNames = new Set();
-  for (const name of filteredPhotoNames) {
-    const photo = await db.photos_v1.get(name);
-    if (photo && photo.blob) existingPhotoNames.add(name);
-  }
-
-  const headers = Object.keys(wsData[0] || {});
-  const fotoCol = headers.indexOf("Foto");
-  ws['!links'] = [];
-  if (fotoCol !== -1) {
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    if (range.e.r >= 1) {
-      for (let R = 1; R <= range.e.r; R++) {
-        const cellRef = XLSX.utils.encode_cell({r: R, c: fotoCol});
-        const cell = ws[cellRef];
-        if (!cell || !cell.v || String(cell.v) === '-') continue;
-        if (!existingPhotoNames.has(cell.v)) continue;
-        cell.l = { Target: 'photos/' + cell.v };
-        ws['!links'].push({ ref: cellRef, Target: 'photos/' + cell.v });
+    const existingPhotoNames = new Set();
+    for (const name of filteredPhotoNames) {
+      const photo = await db.photos_v1.get(name);
+      if (photo && photo.blob) {
+        existingPhotoNames.add(name);
       }
     }
-  }
 
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
+    // Tambah hyperlink hanya untuk foto yang ada di IndexedDB
+    const headers = Object.keys(wsData[0] || {});
+    const fotoCol = headers.indexOf("Foto");
+    ws['!links'] = [];
+    if (fotoCol !== -1) {
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      if (range.e.r >= 1) {
+        for (let R = 1; R <= range.e.r; R++) {
+          const cellRef = XLSX.utils.encode_cell({r: R, c: fotoCol});
+          const cell = ws[cellRef];
+          if (!cell || !cell.v || String(cell.v) === '-') continue;
+          if (!existingPhotoNames.has(cell.v)) continue;
+          cell.l = { Target: 'photos/' + cell.v };
+          ws['!links'].push({ ref: cellRef, Target: 'photos/' + cell.v });
+        }
+      }
+    }
 
-  if (existingPhotoNames.size > 0 && window.JSZip) {
-    downloadCombinedZip(wb, existingPhotoNames, dateName, shiftName, equip).then(() => {
-      showPopup('Data berhasil diexport ke ZIP!','success');
-    }).catch(err => {
-      console.error(err);
-      showPopup('Export ZIP gagal: ' + err.message, 'error');
-    });
-  } else {
-    XLSX.writeFile(wb, `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`);
-    showPopup('Data berhasil diexport ke Excel!','success');
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
+
+    if (existingPhotoNames.size > 0 && window.JSZip) {
+      downloadCombinedZip(wb, existingPhotoNames, dateName, shiftName, equip).then(() => {
+        showPopup('Data berhasil diexport ke ZIP!','success');
+      }).catch(err => {
+        console.error(err);
+        showPopup('Export ZIP gagal: ' + err.message, 'error');
+      });
+    } else {
+      XLSX.writeFile(wb, `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`);
+      showPopup('Data berhasil diexport ke Excel!','success');
+    }
   }
-}
 
 async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
   return new Promise((resolve, reject) => {
@@ -1185,16 +1551,16 @@ async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
     const photosFolder = zip.folder('photos');
 
     const promises = Array.from(photoNames).map(name =>
-      db.photos_v1.get(name).then(photo => {
-        if (photo && photo.blob) {
-          return convertToWebP(photo.blob, 1.0).then(webpBlob => {
-            photosFolder.file(name, webpBlob);
-          }).catch(() => {
-            photosFolder.file(name, photo.blob);
-          });
-        }
-      })
-    );
+    db.photos_v1.get(name).then(photo => {
+      if (photo && photo.blob) {
+        return convertToWebP(photo.blob, 1.0).then(webpBlob => {
+          photosFolder.file(name, webpBlob);
+        }).catch(() => {
+          photosFolder.file(name, photo.blob);
+        });
+      }
+    })
+  );
 
     Promise.all(promises).then(() => {
       const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
@@ -1212,8 +1578,12 @@ async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         resolve();
-      }).catch(err => reject(err));
-    }).catch(err => reject(err));
+      }).catch(err => {
+        reject(err);
+      });
+    }).catch(err => {
+      reject(err);
+    });
   });
 }
 
@@ -1228,14 +1598,18 @@ async function autoShiftUpdate() {
   const info = getShiftAndTanggalKerja();
   SHIFT_AKTIF = info.shift;
 
+  const shiftNow = document.getElementById('shiftNow');
+  if (shiftNow) shiftNow.textContent = `Aktif: ${SHIFT_AKTIF}`;
+
   const btn1 = document.getElementById('btnShift1');
   const btn2 = document.getElementById('btnShift2');
   if (btn1 && btn2) {
     btn1.style.outline = SHIFT_AKTIF === 1 ? '2px solid var(--accent)' : 'none';
     btn2.style.outline = SHIFT_AKTIF === 2 ? '2px solid var(--accent)' : 'none';
-    btn1.disabled = true;
-    btn2.disabled = true;
   }
+
+  if (btn1) btn1.disabled = true;
+  if (btn2) btn2.disabled = true;
 
   const tanggalEl = document.getElementById('tanggalNow');
   if (tanggalEl) tanggalEl.value = info.tanggal;
@@ -1260,7 +1634,7 @@ async function autoShiftUpdate() {
 })();
 
 // ==== GPS ====
-if("geolocation" in navigator){
+if("geolocation"in navigator){
   navigator.geolocation.watchPosition(
     pos=>{
       lokasiTerakhir.lat=pos.coords.latitude;
