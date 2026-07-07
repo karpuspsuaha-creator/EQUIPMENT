@@ -588,6 +588,15 @@ div[style*="overflow:auto"]{
 
 /* ---------- MAP ---------- */
 #map{height:440px;border-radius:12px;border:1px solid var(--outline);margin-top:8px;z-index:0;}
+.locate-btn{
+  width:36px;height:36px;
+  background:var(--surface-2);color:var(--text);
+  border:1px solid var(--outline);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+.locate-btn:hover{background:#334155;}
 
 /* ---------- GPS STATUS PILL ---------- */
 #lokasiInfo{
@@ -663,7 +672,7 @@ div[style*="overflow:auto"]{
   .container{margin-top:72px;max-width:100%;padding:0 12px;}
   .card{padding:18px;}
   #lokasiInfo{top:64px;font-size:11px;padding:6px 10px;max-width:60vw;}
-  #map{height:340px !important;} /* override inline 500px */
+    #map{height:260px !important;}
 }
 @media (max-width:480px){
   #headerLogo{gap:8px;padding:0 10px;}
@@ -800,7 +809,7 @@ div[style*="overflow:auto"]{width:100%;max-width:100%;min-width:0;box-sizing:bor
 
     <div class="col-12" style="margin-top:16px;">
       <label>Pilih Titik Lokasi (klik peta)</label>
-      <div id="map" style="height:500px;border-radius:12px;margin-top:6px;"></div>
+      <div id="map" style="height:420px;border-radius:12px;margin-top:6px;"></div>
       <div class="chip" id="areaName" style="margin-top:6px;">User Location: -</div>
       <div class="chip" id="unitLocationDisplay" style="margin-top:4px;">Unit Location: -</div>
     </div>
@@ -1721,8 +1730,8 @@ if("geolocation"in navigator){
         window.updateUserMarker(lokasiTerakhir.lat, lokasiTerakhir.lon);
       }
     },
-    err=>{document.getElementById("lokasiInfo").textContent="GPS Error: "+err.message;},
-    {enableHighAccuracy:true,maximumAge:0,timeout:15000}
+    err=>{},
+    {enableHighAccuracy:false,maximumAge:10000,timeout:10000}
   );
 }else{
   document.getElementById("lokasiInfo").textContent="GPS tidak tersedia";

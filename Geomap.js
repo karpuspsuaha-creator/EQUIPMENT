@@ -246,22 +246,35 @@ function clearKmz() {
 window.loadKmz = loadKmz;
 window.clearKmz = clearKmz;
 
+function isMobile() {
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
+
+function retinaScale() {
+  return Math.min(window.devicePixelRatio || 1, 2);
+}
+
 function initMap() {
   const mapElement = document.getElementById('map');
   if (!mapElement) return;
 
-  // === DEFAULT VIEW ===
-  const defaultLatLng = [-2.5, 118];
+  const defaultLatLng = [-2.5489, 118.0149];
 
-  // === TILE LAYER OPENSTREETMAP ===
-  const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
+  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  const osmLayer = L.tileLayer(tileUrl, {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19
   });
 
-  // === INIT MAP ===
   map = L.map('map', {
-    center: defaultLatLng,
+    center: [0, 118],
     zoom: 5,
+    zoomAnimation: false,
+    fadeAnimation: false,
+    markerZoomAnimation: false,
+    maxBounds: [[-20, 88], [10, 148]],
+    maxBoundsViscosity: 0.8,
     layers: [osmLayer]
   });
 
@@ -280,10 +293,47 @@ function initMap() {
   // === JIKA ADA GPS TERAKHIR ===
   if (window.lokasiTerakhir && lokasiTerakhir.lat && lokasiTerakhir.lon) {
     const latlng = [lokasiTerakhir.lat, lokasiTerakhir.lon];
-    map.setView(latlng, 15);
+    map.setView(latlng, 14);
     marker = L.marker(latlng, { draggable: true }).addTo(map);
     updateUserMarker(lokasiTerakhir.lat, lokasiTerakhir.lon);
   }
+
+  addLocateControl();
+}
+
+function addLocateControl() {
+  const LocateControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function () {
+      const btn = L.DomUtil.create('div', 'locate-btn leaflet-bar');
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
+      btn.title = 'Ke lokasi saya';
+      L.DomEvent.disableClickPropagation(btn);
+      btn.onclick = () => {
+        if (!navigator.geolocation) {
+          return;
+        }
+        const last = window.lokasiTerakhir;
+        if (last && last.lat && last.lon) {
+          map.setView([last.lat, last.lon], 15);
+          updateUserMarker(last.lat, last.lon);
+        }
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const latlng = [pos.coords.latitude, pos.coords.longitude];
+             map.setView(latlng, 15);
+             updateUserMarker(latlng[0], latlng[1]);
+            updateLatLon({ lat: latlng[0], lng: latlng[1] });
+            document.getElementById('lokasiInfo').textContent = `GPS: ${latlng[0].toFixed(5)}, ${latlng[1].toFixed(5)}`;
+          },
+          () => {},
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 10000 }
+        );
+      };
+      return btn;
+    }
+  });
+  new LocateControl().addTo(map);
 }
 
 function updateLatLon(latlng) {
