@@ -1623,8 +1623,8 @@ const ws=XLSX.utils.json_to_sheet(wsData);
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'Data Equipment');
 
-    if (existingPhotoNames.size > 0 && window.JSZip) {
-      downloadCombinedZip(wb, existingPhotoNames, dateName, shiftName, equip).then(() => {
+    if (window.JSZip) {
+      downloadCombinedZip(wb, existingPhotoNames, data, dateName, shiftName, equip).then(() => {
         showPopup('Data berhasil diexport ke ZIP!','success');
       }).catch(err => {
         console.error(err);
@@ -1636,12 +1636,51 @@ const ws=XLSX.utils.json_to_sheet(wsData);
     }
   }
 
-async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
-  return new Promise((resolve, reject) => {
-    const zip = new JSZip();
-    const photosFolder = zip.folder('photos');
+// ==== GENERATE KMZ (Unit Code + Unit Latitude + Unit Longitude) ====
+function escapeXml(s){
+  return String(s == null ? '' : s).replace(/[&<>'"]/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&apos;','"':'&quot;'
+  }[c]));
+}
 
-    const promises = Array.from(photoNames).map(name =>
+async function generateKmzBlob(rows, equip, dateName, shiftName){
+  const placemarks = (rows || [])
+    .filter(r => r.unitLat != null && r.unitLon != null)
+    .map(r => {
+      const name = escapeXml(r.hauler || 'Unit');
+      const desc = escapeXml(
+        `Code Unit: ${r.hauler || '-'}\n` +
+        `ID Equipment: ${r.equipment || '-'}\n` +
+        `Tanggal: ${r.tanggal || '-'}\n` +
+        `Shift: ${r.shift || '-'}\n` +
+        `Category: ${r.category || '-'}\n` +
+        `Unit Latitude: ${r.unitLat}\n` +
+        `Unit Longitude: ${r.unitLon}`
+      );
+      return `<Placemark><name>${name}</name><description>${desc}</description>` +
+             `<Point><coordinates>${r.unitLon},${r.unitLat},0</coordinates></Point></Placemark>`;
+    }).join('');
+
+  const kml =
+`<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${escapeXml('Unit Location ' + (equip || 'ALL') + ' ' + dateName + ' ' + shiftName)}</name>
+${placemarks}
+  </Document>
+</kml>`;
+
+  const kmz = new JSZip();
+  kmz.file('doc.kml', kml);
+  return kmz.generateAsync({type:'blob'});
+}
+
+// ==== DOWNLOAD ZIP (Excel + Foto + KMZ) ====
+async function downloadCombinedZip(wb, photoNames, data, dateName, shiftName, equip){
+  const zip = new JSZip();
+  const photosFolder = zip.folder('photos');
+
+  const promises = Array.from(photoNames).map(name =>
     db.photos_v1.get(name).then(photo => {
       if (photo && photo.blob) {
         return convertToWebP(photo.blob, 1.0).then(webpBlob => {
@@ -1653,29 +1692,27 @@ async function downloadCombinedZip(wb, photoNames, dateName, shiftName, equip){
     })
   );
 
-    Promise.all(promises).then(() => {
-      const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
-      const fileName = `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`;
-      zip.file(fileName, wbout, {base64: true});
+  await Promise.all(promises);
 
-      zip.generateAsync({type:'blob'}).then(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `Export_${equip || 'ALL'}_${dateName}_${shiftName}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        resolve();
-      }).catch(err => {
-        reject(err);
-      });
-    }).catch(err => {
-      reject(err);
-    });
-  });
+  const kmzBlob = await generateKmzBlob(data, equip, dateName, shiftName);
+  if (kmzBlob) {
+    zip.file(`Unit location_${equip}_${dateName}_${shiftName}.kmz`, kmzBlob);
+  }
+
+  const wbout = XLSX.write(wb, {bookType:'xlsx', type:'base64'});
+  const fileName = `Equipment_${dateName}_${shiftName}_${equip || 'ALL'}.xlsx`;
+  zip.file(fileName, wbout, {base64: true});
+
+  const blob = await zip.generateAsync({type:'blob'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = `Export_${equip || 'ALL'}_${dateName}_${shiftName}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ==== EQUIPMENT ====
