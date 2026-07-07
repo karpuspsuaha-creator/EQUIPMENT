@@ -820,7 +820,11 @@ div[style*="overflow:auto"]{width:100%;max-width:100%;min-width:0;box-sizing:bor
         <button class="btn secondary" onclick="document.getElementById('photoInput').click()" style="width:auto;">
           Ambil Foto
         </button>
+        <button class="btn secondary" onclick="document.getElementById('photoUpload').click()" style="width:auto;">
+          Upload Foto
+        </button>
         <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this.files[0])">
+        <input type="file" id="photoUpload" accept="image/*" style="display:none" onchange="handlePhoto(this.files[0])">
         <button class="btn secondary" id="btnClearPhoto" onclick="clearPhoto()" style="width:auto;display:none;">
           Hapus Foto
         </button>
@@ -1115,6 +1119,7 @@ function clearPhoto() {
   photoData = null;
   photoName = null;
   document.getElementById('photoInput').value = '';
+  document.getElementById('photoUpload').value = '';
   document.getElementById('photoPreview').style.display = 'none';
   document.getElementById('photoStatus').style.display = 'none';
   document.getElementById('btnClearPhoto').style.display = 'none';
