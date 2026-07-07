@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Form Daily Input Equipment</title>
 <meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="manifest.json" />
@@ -401,7 +401,8 @@ body::after {
 
 /* ---------- BASE ---------- */
 *{box-sizing:border-box}
-html,body{height:100%}
+html,body{height:100%;width:100%;max-width:100%;overflow-x:hidden;}
+img{max-width:100%;height:auto}
 body{
   margin:0;
   background:linear-gradient(165deg,#0a0f1e 0%,#0f172a 55%,#0b1220 100%);
@@ -451,11 +452,18 @@ body::after{
   font-size:26px;font-weight:700;letter-spacing:.5px;color:#f8fafb;
   text-shadow:0 1px 2px rgba(0,0,0,.45);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  flex:1;min-width:0;
 }
 
 /* ---------- CONTAINER ---------- */
 .container{
-  max-width:960px;margin:88px auto 36px;padding:0 16px;
+  width:100%;
+  max-width:960px;
+  margin:88px auto 36px;
+  margin-left:auto;margin-right:auto;
+  padding:0 16px;
+  min-width:0;
+  box-sizing:border-box;
 }
 
 /* ---------- CARD ---------- */
@@ -467,6 +475,7 @@ body::after{
   box-shadow:var(--shadow);
   transition:box-shadow .25s ease;
   margin-bottom:20px;
+  min-width:0;
 }
 .card:hover{box-shadow:0 2px 8px rgba(0,0,0,.5),0 14px 34px rgba(0,0,0,.38);}
 
@@ -477,7 +486,8 @@ h2{
 }
 
 /* ---------- FORM GRID ---------- */
-.row{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:0;}
+.row{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:0;min-width:0;}
+.row > *{min-width:0;}
 .col-3{grid-column:span 3}
 .col-4{grid-column:span 4}
 .col-6{grid-column:span 6}
@@ -561,6 +571,8 @@ select{
 div[style*="overflow:auto"]{
   border:1px solid var(--outline);border-radius:12px;max-height:480px;
   background:var(--card);
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+  overflow-x:auto;
 }
 .table{width:100%;border-collapse:collapse;overflow:hidden;}
 .table th,.table td{padding:12px 10px;border-bottom:1px solid var(--outline);text-align:left;font-size:13px;}
@@ -638,23 +650,33 @@ div[style*="overflow:auto"]{
 ::-webkit-scrollbar-track{background:transparent;}
 
 /* ---------- RESPONSIVE ---------- */
+/* Stacking dilebarkan ke 992px biar tablet & device lebar ikut mengecil */
+@media (max-width:992px){
+  .container{max-width:100%;}
+  .row{grid-template-columns:1fr;}
+  .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1;}
+}
 @media (max-width:768px){
   #headerLogo{height:56px;padding:0 12px;gap:10px;}
   #logoPerusahaan{height:36px;}
-  #namaPerusahaan{font-size:14px;}
+  #namaPerusahaan{font-size:16px;}
   .container{margin-top:72px;max-width:100%;padding:0 12px;}
-  .row{grid-template-columns:1fr;}
-  .col-3,.col-4,.col-6,.col-8,.col-12{grid-column:span 1;}
   .card{padding:18px;}
-  #lokasiInfo{top:64px;font-size:11px;padding:6px 10px;}
-  #map{height:360px;}
+  #lokasiInfo{top:64px;font-size:11px;padding:6px 10px;max-width:60vw;}
+  #map{height:340px !important;} /* override inline 500px */
 }
 @media (max-width:480px){
-  #namaPerusahaan{font-size:16px;}
+  #headerLogo{gap:8px;padding:0 10px;}
+  #logoPerusahaan{height:32px;}
+  #namaPerusahaan{font-size:13px;}
+  .container{margin-top:68px;padding:0 10px;}
   .card{padding:16px;}
   .btn{font-size:13px;padding:0 14px;}
+  #lokasiInfo{max-width:55vw;font-size:10px;padding:5px 8px;}
   #btnPrevPage,#btnNextPage{min-width:0;flex:1;}
 }
+/* Cegah table menyebabkan halaman overflow horizontal */
+div[style*="overflow:auto"]{width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:auto;}
 </style>
 </head>
 <body>
